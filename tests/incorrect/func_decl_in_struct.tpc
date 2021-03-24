@@ -1,0 +1,5 @@
+struct airplane {
+	int weight;
+	int bigger(struct airplane a, struct airplane b);
+}
+

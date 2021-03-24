@@ -1,0 +1,15 @@
+/* single line comments /* */
+int x;
+/* Multiple 
+	line
+		comments
+		with
+	instruction in it
+	int main (((void) return "helo";
+	if ( x > 5 ) return x;
+
+*/
+int main(void){
+	int y;
+	return 0;
+}

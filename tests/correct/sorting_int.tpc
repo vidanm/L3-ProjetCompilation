@@ -1,0 +1,11 @@
+int greater_than(int a,int b){
+	return a > b;
+}
+
+int main(void){
+	int ad ;
+	int aa ;
+	ad = 5 ;
+ 	ba = 6 ;
+	return greater_than(ad,ba);
+}

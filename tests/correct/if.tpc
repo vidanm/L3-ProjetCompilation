@@ -1,0 +1,13 @@
+int main ( void ) {
+	
+	if ( x < 5 ) {
+		x = x + 5;
+	}
+	else if ( x < 3 ) {
+		x = x + 5;
+	}
+	else {
+		x = x + 1;
+	};;;
+
+}

@@ -1,0 +1,3 @@
+struct airplane bigger_plane(struct airplane a, struct airplane b){
+	return a;
+}

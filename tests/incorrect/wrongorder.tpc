@@ -1,0 +1,7 @@
+int main(void){
+	if (x => y)
+		return 0;
+	if ( y =< x)
+		return 0;;
+	return 1;
+}

@@ -1,0 +1,5 @@
+struct hello { int x; int y; };
+
+int main(void){
+	struct xa x;
+}

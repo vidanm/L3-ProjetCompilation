@@ -1,0 +1,9 @@
+struct airplane { int fuel; char code; };
+struct car { int fuel; char plate; };
+
+int x;
+
+int main(void) {
+	struct car dacia ;
+	struct airplane airbus ;
+}

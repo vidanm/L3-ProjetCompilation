@@ -1,0 +1,8 @@
+int recursion(int a){
+	return recursion(a-1);
+}
+
+int main(void){
+	int a;
+	return recursion(a);
+}

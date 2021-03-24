@@ -1,0 +1,8 @@
+int main (void){
+
+	if (x && y || z == a)
+		return 1;
+	else 
+		return 0;;
+ 
+}
