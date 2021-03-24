@@ -11,8 +11,8 @@ $(EXEC): src/lex.yy.c src/$(EXEC).tab.c src/abstract-tree.c
 src/$(EXEC).tab.c : src/tpc-2020-2021.y
 	bison -d src/tpc-2020-2021.y -o src/$(EXEC).tab.c -ly
 
-lex.yy.c: src/$(EXEC).lex
-	flex -o src/$(EXEC).lex src/lex.yy.c
+src/lex.yy.c: src/$(EXEC).lex
+	flex -o src/lex.yy.c src/$(EXEC).lex
 
 clean :
 	rm src/*.tab.c src/*.tab.h src/lex.yy.c
