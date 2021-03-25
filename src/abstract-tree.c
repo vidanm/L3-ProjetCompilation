@@ -12,7 +12,12 @@ static const char *StringFromKind[] = {
   "Identifier",
   "UnaryAddSub",
   "CharLiteral",
-  "Negation"
+  "Negation",
+  "UnaryDivStar",
+  "UnaryOrder",
+  "Eq",
+  "Or",
+  "And"
   /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
