@@ -22,7 +22,7 @@ int err=0;
 %}
 
 %union value {
-	Node *node;
+	struct Node *node;
 	char character;
 	int integer;
 	char identifier[64];
@@ -152,9 +152,8 @@ T   :  T DIVSTAR F
 F   :  ADDSUB F { $$=makeNode(UnaryAddSub);
     		  addChild($$,$2); }
 
-    |  '!' F { Node *n = makeNode(F);
-	       $$ = makeNode(F);
-	       addChild($$,n); }
+    |  '!' F { $$ = makeNode(Negation);
+	       addChild($$,$2); }
 
     |  '(' Exp ')' { $$ = $2; }
 
