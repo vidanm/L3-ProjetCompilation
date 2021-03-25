@@ -131,23 +131,41 @@ Instr:
     |  '{' SuiteInstr '}' 
     |  ';' 
     ;
-Exp :  Exp OR TB 
-    |  TB 
+Exp :  Exp OR TB { $$=makeNode(Or);
+    		   addChild($$,$1);
+		   addSibling($1,$3);
+		 }
+    |  TB { $$ = $1; }
     ;
-TB  :  TB AND FB 
-    |  FB 
+TB  :  TB AND FB { $$=makeNode(And);
+    		   addChild($$,$1);
+		   addSibling($1,$3);
+		 }
+    |  FB { $$ = $1; }
     ;
-FB  :  FB EQ M
-    |  M
+FB  :  FB EQ M { $$=makeNode(Eq);
+    		   addChild($$,$1);
+		   addSibling($1,$3);
+		 }
+    |  M { $$ = $1; }
     ;
-M   :  M ORDER E 
-    |  E 
+M   :  M ORDER E { $$=makeNode(UnaryOrder);
+    		   addChild($$,$1);
+		   addSibling($1,$3);
+		 } 
+    |  E { $$ = $1; }
     ;
-E   :  E ADDSUB T 
-    |  T 
+E   :  E ADDSUB T { $$=makeNode(UnaryAddSub);
+    		    addChild($$,$1);
+		    addSibling($1,$3);
+		  }
+    |  T { $$ = $1; }
     ;    
-T   :  T DIVSTAR F 
-    |  F 
+T   :  T DIVSTAR F { $$=makeNode(UnaryDivStar);
+    		     addChild($$,$1);
+		     addSibling($1,$3);
+		   }
+    |  F { $$ = $1; }
     ;
 F   :  ADDSUB F { $$=makeNode(UnaryAddSub);
     		  addChild($$,$2); }
@@ -165,10 +183,13 @@ F   :  ADDSUB F { $$=makeNode(UnaryAddSub);
 
     |  LValue { $$ = $1 ;}
 
-    |  IDENT '(' Arguments  ')' 
+    |  IDENT '(' Arguments  ')' { $$ = makeNode(Identifier);
+				  strcpy($$->u.identifier,$1);
+				  }
     ;
 LValue:
-       IDENT 
+       IDENT { $$ = makeNode(Identifier);
+	       strcpy($$->u.identifier,$1); }
     ;
 Arguments:
        ListExp 
