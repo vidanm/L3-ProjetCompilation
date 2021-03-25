@@ -541,13 +541,13 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    61,    61,    62,    65,    66,    67,    68,    71,    74,
-      78,    79,    83,    84,    88,    89,    93,    96,    97,   100,
-     101,   102,   103,   106,   107,   109,   110,   112,   113,   116,
-     117,   120,   121,   122,   123,   124,   125,   126,   127,   128,
-     129,   130,   131,   133,   134,   136,   137,   139,   140,   142,
-     143,   145,   146,   148,   149,   151,   154,   158,   160,   163,
-     166,   168,   171,   174,   175,   178,   179
+       0,    62,    62,    63,    66,    67,    68,    69,    72,    75,
+      79,    80,    84,    85,    89,    90,    94,    97,    98,   101,
+     102,   103,   104,   107,   108,   110,   111,   113,   114,   117,
+     118,   121,   122,   123,   124,   125,   126,   127,   128,   129,
+     130,   131,   132,   134,   135,   137,   138,   140,   141,   143,
+     144,   146,   147,   149,   150,   152,   155,   159,   161,   164,
+     167,   169,   172,   175,   176,   179,   180
 };
 #endif
 
@@ -1225,32 +1225,32 @@ yyreduce:
     break;
 
   case 55: /* F: ADDSUB F  */
-                { (yyval.value)=makeNode(UnaryAddSub);
-    		  addChild((yyval.value),(yyvsp[0].value)); }
+                { (yyval.node)=makeNode(UnaryAddSub);
+    		  addChild((yyval.node),(yyvsp[0].node)); }
     break;
 
   case 56: /* F: '!' F  */
              { Node *n = makeNode(F);
-	       (yyval.value) = makeNode(F);
-	       addChild((yyval.value),n); }
+	       (yyval.node) = makeNode(F);
+	       addChild((yyval.node),n); }
     break;
 
   case 57: /* F: '(' Exp ')'  */
-                   { (yyval.value) = (yyvsp[-1].value); }
+                   { (yyval.node) = (yyvsp[-1].node); }
     break;
 
   case 58: /* F: NUM  */
-           { (yyval.value) = makeNode(IntLiteral);
-	     (yyval.value)->u.integer = (yyvsp[0].integer);}
+           { (yyval.node) = makeNode(IntLiteral);
+	     (yyval.node)->u.integer = (yyvsp[0].integer);}
     break;
 
   case 59: /* F: CHARACTER  */
-                 { (yyval.value) = makeNode(CharLiteral);
-		   (yyval.value)->u.character = (yyvsp[0].character);}
+                 { (yyval.node) = makeNode(CharLiteral);
+		   (yyval.node)->u.character = (yyvsp[0].character);}
     break;
 
   case 60: /* F: LValue  */
-              { (yyval.value) = (yyvsp[0].value) ;}
+              { (yyval.node) = (yyvsp[0].node) ;}
     break;
 
 

@@ -74,8 +74,8 @@ struct "struct"
 {divstar} return DIVSTAR;
 {void} return VOID;
 {print} return PRINT;
-{num} return NUM;
-{character} return CHARACTER;
+{num} yylval.integer = atoi(yytext); return NUM;
+{character} yylval.character = yytext[0]; return CHARACTER;
 {return} return RETURN;
 {if} return IF;
 {else} return ELSE;
@@ -83,7 +83,7 @@ struct "struct"
 {reade} return READE;
 {readc} return READC;
 {struct} return STRUCT;
-{ident} return IDENT;
+{ident} strcpy(yylval.identifier,yytext); return IDENT;
 " "|\t|\r|\n { if(yytext[0] == '\n' || yytext[0] == '\r') {lineno++; strcpy(line,"\0");count=0;linesize=0;}
 else if (yytext[0] == '\t') count+=4;}
 . return yytext[0];

@@ -867,12 +867,12 @@ return PRINT;
 case 13:
 YY_RULE_SETUP
 #line 77 "src/as.lex"
-return NUM;
+yylval.integer = atoi(yytext); return NUM;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 78 "src/as.lex"
-return CHARACTER;
+yylval.character = yytext[0]; return CHARACTER;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
@@ -912,7 +912,7 @@ return STRUCT;
 case 22:
 YY_RULE_SETUP
 #line 86 "src/as.lex"
-return IDENT;
+strcpy(yylval.identifier,yytext); return IDENT;
 	YY_BREAK
 case 23:
 /* rule 23 can match eol */

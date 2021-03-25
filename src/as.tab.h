@@ -105,6 +105,7 @@ extern int yydebug;
 union value
 {
 
+	Node *node;
 	char character;
 	int integer;
 	char identifier[64];

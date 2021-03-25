@@ -22,6 +22,7 @@ int err=0;
 %}
 
 %union value {
+	Node *node;
 	char character;
 	int integer;
 	char identifier[64];
@@ -48,14 +49,14 @@ int err=0;
 %token STRUCT
 %start Prog
 
-%type<value> F
-%type<value> Exp
-%type<value> LValue
-%type<value> TB
-%type<value> FB
-%type<value> M
-%type<value> E
-%type<value> T
+%type <node> F
+%type <node> Exp
+%type <node> LValue
+%type <node> TB
+%type <node> FB
+%type <node> M
+%type <node> E
+%type <node> T
 
 %%
 Prog:  DeclGlob DeclFoncts
