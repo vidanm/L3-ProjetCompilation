@@ -58,6 +58,7 @@ int err=0;
 %type <node> E
 %type <node> T
 
+
 %%
 Prog:  DeclGlob DeclFoncts
     |
@@ -135,7 +136,7 @@ Exp :  Exp OR TB { $$=makeNode(Or);
     		   addChild($$,$1);
 		   addSibling($1,$3);
 		 }
-    |  TB { $$ = $1; }
+    |  TB { $$ = $1; printTree($1);}
     ;
 TB  :  TB AND FB { $$=makeNode(And);
     		   addChild($$,$1);
