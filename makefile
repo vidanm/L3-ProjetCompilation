@@ -15,4 +15,4 @@ src/lex.yy.c: src/$(EXEC).lex
 	flex -o src/lex.yy.c src/$(EXEC).lex
 
 clean :
-	rm src/*.tab.c src/*.tab.h src/lex.yy.c
+	rm -f src/*.tab.c src/*.tab.h src/lex.yy.c

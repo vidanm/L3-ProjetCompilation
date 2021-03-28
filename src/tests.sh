@@ -1,10 +1,14 @@
 note=0
 total=0
 
+BASEDIR=$(dirname "$0")
+correct_tests= $BASEDIR/../tests/correct/*.tpc
+incorrect_tests=$BASEDIR/../tests/incorrect/*.tpc
+
 printf "\nCORRECT\n\n"
 echo " CORRECT " > test_results
 echo " " >> test_results
-for f in ../tests/correct/*.tpc
+for f in $correct_tests
 do	
 	let total++
 	./../as < $f
@@ -29,7 +33,7 @@ echo " " >> test_results
 echo " INCORRECT " >> test_results
 echo " " >> test_results
 
-for f in ../tests/incorrect/*.tpc
+for f in $incorrect_tests
 do
 	echo " " >> test_results
 	let total++
