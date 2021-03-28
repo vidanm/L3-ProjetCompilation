@@ -5,6 +5,8 @@ BASEDIR=$(dirname "$0")
 correct_tests= $BASEDIR/../tests/correct/*.tpc
 incorrect_tests=$BASEDIR/../tests/incorrect/*.tpc
 
+AS=$BASEDIR/../as
+
 printf "\nCORRECT\n\n"
 echo " CORRECT " > test_results
 echo " " >> test_results
@@ -12,7 +14,7 @@ for f in $correct_tests
 do	
 	let total++
 	./../as < $f
-	x=$(./../as < $f)
+	x=$($AS < $f)
 	result=$?
 	if [ $result -eq 0 ]
 	then
@@ -37,7 +39,7 @@ for f in $incorrect_tests
 do
 	echo " " >> test_results
 	let total++
-	x=$(./../as < $f)
+	x=$($AS < $f)
 	result=$?
 	if [ $result -ne 0 ]
 	then
