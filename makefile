@@ -17,5 +17,5 @@ src/lex.yy.c: src/$(EXEC).flex
 clean :
 	rm -f src/*.tab.c src/*.tab.h src/lex.yy.c
 
-test:
+test: $(EXEC)
 	bash ./src/tests.sh

@@ -21,7 +21,7 @@ extern char line[200];
 int err=0;
 %}
 
-%union value {
+%union {
 	struct Node *node;
 	char character;
 	int integer;
@@ -94,30 +94,37 @@ DeclFoncts:
 DeclFonct:
        EnTeteFonct Corps
     ;
+    
 EnTeteFonct:
        Type IDENT Parametres
     |  VOID IDENT Parametres
     ;
+
 Parametres:
        '(' VOID ')' 
     |  '(' ListTypVar ')'
     |	'(' error ')' { yyerrok; err=1; }
     | '('')'
     ;
+
 ListTypVar:
        ListTypVar ',' Type IDENT 
     |  Type IDENT 
     ;
+
 Corps: '{' DeclVars SuiteInstr '}'
      | '{' SuiteInstr '}'
     ;
+
 Type: TYPE
     | STRUCT IDENT
     ;
+
 SuiteInstr:
        SuiteInstr Instr 
     |
     ;
+
 Instr:
        LValue '=' Exp ';'
     |  READE '(' IDENT ')' ';'
@@ -130,67 +137,79 @@ Instr:
     |  RETURN Exp ';' 
     |  RETURN ';' 
     |  '{' SuiteInstr '}' 
-    |  ';' 
+    |  ';'
     ;
-Exp :  Exp OR TB { $$=makeNode(Or);
-    		   addChild($$,$1);
-		   addSibling($1,$3);
-		 }
-    |  TB { $$ = $1; printTree($1);}
+
+Exp :  Exp OR TB    {   $$=makeNode(Or);
+    		            addChild($$,$1);
+		                addSibling($1,$3);
+		            }
+    |  TB           { $$ = $1; printTree($1);}
     ;
-TB  :  TB AND FB { $$=makeNode(And);
-    		   addChild($$,$1);
-		   addSibling($1,$3);
-		 }
-    |  FB { $$ = $1; }
+
+TB  :  TB AND FB    {   $$=makeNode(And);
+    		            addChild($$,$1);
+		                addSibling($1,$3);
+		            }
+    |  FB           { $$ = $1; }
     ;
-FB  :  FB EQ M { $$=makeNode(Eq);
-    		   addChild($$,$1);
-		   addSibling($1,$3);
-		 }
-    |  M { $$ = $1; }
+
+FB  :  FB EQ M      {   $$=makeNode(Eq);
+    		            addChild($$,$1);
+		                addSibling($1,$3);
+		            }
+    |  M            {   $$ = $1; }
     ;
-M   :  M ORDER E { $$=makeNode(UnaryOrder);
-    		   addChild($$,$1);
-		   addSibling($1,$3);
-		 } 
+
+M   :  M ORDER E    {   $$=makeNode(UnaryOrder);
+    		            addChild($$,$1);
+		                addSibling($1,$3);
+		            } 
     |  E { $$ = $1; }
     ;
-E   :  E ADDSUB T { $$=makeNode(UnaryAddSub);
-    		    addChild($$,$1);
-		    addSibling($1,$3);
-		  }
-    |  T { $$ = $1; }
-    ;    
-T   :  T DIVSTAR F { $$=makeNode(UnaryDivStar);
-    		     addChild($$,$1);
-		     addSibling($1,$3);
-		   }
-    |  F { $$ = $1; }
-    ;
-F   :  ADDSUB F { $$=makeNode(UnaryAddSub);
-    		  addChild($$,$2); }
 
-    |  '!' F { $$ = makeNode(Negation);
-	       addChild($$,$2); }
+E   :  E ADDSUB T   {   $$=makeNode(UnaryAddSub);
+    		            addChild($$,$1);
+		                addSibling($1,$3);
+		            }
+    |  T            { $$ = $1; }
+    ;   
+
+T   :  T DIVSTAR F  {   $$=makeNode(UnaryDivStar);
+    		            addChild($$,$1);
+		                addSibling($1,$3);
+		            }
+    |  F            { $$ = $1; }
+    ;
+
+F   :  ADDSUB F     {   $$=makeNode(UnaryAddSub);
+    		            addChild($$,$2); 
+                    }
+
+    |  '!' F        {   $$ = makeNode(Negation);
+	                    addChild($$,$2); 
+                    }
 
     |  '(' Exp ')' { $$ = $2; }
 
-    |  NUM { $$ = makeNode(IntLiteral);
-	     $$->u.integer = $1;}
+    |  NUM          {   $$ = makeNode(IntLiteral);
+	                    $$->u.integer = $1;
+                    }
 
-    |  CHARACTER { $$ = makeNode(CharLiteral);
-		   $$->u.character = $1;}
+    |  CHARACTER    {   $$ = makeNode(CharLiteral);
+		                $$->u.character = $1;
+                    }
 
-    |  LValue { $$ = $1 ;}
+    |  LValue       {   $$ = $1 ;}
 
-    |  IDENT '(' Arguments  ')' { $$ = makeNode(Identifier);
-				  strcpy($$->u.identifier,$1);
-				  }
+    |  IDENT '(' Arguments  ')' {   $$ = makeNode(Identifier);
+				                    strcpy($$->u.identifier,$1);
+				                }
     ;
 LValue:
-       IDENT { $$ = makeNode(Identifier);
-	       strcpy($$->u.identifier,$1); }
+       IDENT        {   $$ = makeNode(Identifier);
+	                    strcpy($$->u.identifier,$1); 
+                    }
     ;
 Arguments:
        ListExp 
