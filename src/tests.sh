@@ -13,7 +13,7 @@ echo " " >> test_results
 for f in $correct_tests
 do	
 	let total++
-	./../as < $f
+	$AS < $f
 	x=$($AS < $f)
 	result=$?
 	if [ $result -eq 0 ]
