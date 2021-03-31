@@ -17,7 +17,19 @@ static const char *StringFromKind[] = {
   "UnaryOrder",
   "Eq",
   "Or",
-  "And"
+  "And",
+  "Type",
+  "Struct",
+  "Assign",
+  "Reade",
+  "Readc",
+  "Print",
+  "If",
+  "While",
+  "FunctionCalling",
+  "Return",
+  "Void",
+  "Else"
   /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */

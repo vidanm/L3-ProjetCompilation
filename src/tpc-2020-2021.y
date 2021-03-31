@@ -57,6 +57,11 @@ int err=0;
 %type <node> M
 %type <node> E
 %type <node> T
+%type <node> Type
+%type <node> SuiteInstr
+%type <node> Instr
+%type <node> Arguments
+%type <node> ListExp
 
 
 %%
@@ -111,32 +116,50 @@ ListTypVar:
 Corps: '{' DeclVars SuiteInstr '}'
      | '{' SuiteInstr '}'
     ;
-Type: TYPE
-    | STRUCT IDENT
+Type: TYPE { $$=makeNode(Type); }
+    | STRUCT IDENT { $$=makeNode(Struct); }
     ;
 SuiteInstr:
-       SuiteInstr Instr 
-    |
+       SuiteInstr Instr { $$=$2;
+			  addSibling($$,$1);
+			  printTree($2); }
+    | { $$ = NULL; }
     ;
 Instr:
-       LValue '=' Exp ';'
-    |  READE '(' IDENT ')' ';'
-    |  READC '(' IDENT ')' ';'
-    |  PRINT '(' Exp ')' ';'
-    |  IF '(' Exp ')' Instr ';'
-    |  IF '(' Exp ')' Instr ELSE Instr ';'
-    |  WHILE '(' Exp ')' Instr ';'
-    |  IDENT '(' Arguments  ')' ';'
-    |  RETURN Exp ';' 
-    |  RETURN ';' 
-    |  '{' SuiteInstr '}' 
-    |  ';' 
+       LValue '=' Exp ';' { $$=makeNode(Assign);
+			    addChild($$,$1);
+			    addSibling($$,$3); }
+
+    |  READE '(' IDENT ')' ';' { $$=makeNode(Reade); }
+    |  READC '(' IDENT ')' ';' { $$=makeNode(Readc); }
+    |  PRINT '(' Exp ')' ';' { $$=makeNode(Print); }
+    |  IF '(' Exp ')' Instr ';' { $$=makeNode(If); 
+				  addSibling($$,$3);
+				  addChild($$,$5); }
+    |  IF '(' Exp ')' Instr ELSE Instr ';' { $$=makeNode(If);
+				  Node *n = makeNode(Else);
+				  addSibling($$,$3);
+			          addSibling($3,n);
+				  addChild($3,$5);
+				  addChild(n,$7); }
+
+    |  WHILE '(' Exp ')' Instr ';' { $$=makeNode(While);
+				     addSibling($$,$3);
+				     addChild($$,$5); }
+    |  IDENT '(' Arguments  ')' ';' { $$=makeNode(FunctionCalling);
+				      strcpy($$->u.identifier,$1);
+				      addSibling($$,$3); }
+    |  RETURN Exp ';' { $$=makeNode(Return);
+			addChild($$,$2); }
+    |  RETURN ';' { $$=makeNode(Return); }
+    |  '{' SuiteInstr '}' { $$=$2; }
+    |  ';' { $$ = NULL; }
     ;
 Exp :  Exp OR TB { $$=makeNode(Or);
     		   addChild($$,$1);
 		   addSibling($1,$3);
 		 }
-    |  TB { $$ = $1; printTree($1);}
+    |  TB { $$ = $1;}
     ;
 TB  :  TB AND FB { $$=makeNode(And);
     		   addChild($$,$1);
@@ -193,12 +216,12 @@ LValue:
 	       strcpy($$->u.identifier,$1); }
     ;
 Arguments:
-       ListExp 
-    |
+       ListExp {$$ = $1;}
+    | {$$ = NULL;}
     ;
 ListExp:
-       ListExp ',' Exp 
-    |  Exp 
+       ListExp ',' Exp {$$ = $3; addSibling($$,$1);}
+    |  Exp {$$=$1;}
     ;
 %%
 
