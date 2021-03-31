@@ -2,7 +2,7 @@ note=0
 total=0
 
 BASEDIR=$(dirname "$0")
-correct_tests= $BASEDIR/../tests/correct/*.tpc
+correct_tests=$BASEDIR/../tests/correct/*.tpc
 incorrect_tests=$BASEDIR/../tests/incorrect/*.tpc
 
 AS=$BASEDIR/../as
