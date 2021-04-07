@@ -37,6 +37,7 @@ void printTable(){
 		      );
 }
 
+/* Incorrect, les cas ne sont pas les bons*/
 void createTable(Node *node){
 	switch(node -> kind){
 		case IntLiteral: addVar(node->u.identifier,
