@@ -3,16 +3,31 @@
 typedef enum {
   Program,
   VarDeclList,
-  IntLiteral,
+  /* instructions */
+  Move,
+  InstrIF,
+  InstrIFELSE,
+  InstrWhile,
+  InstrReadE,
+  InstrReadC,
+  InstrPrint,
+  Instructions,
+  EmptyInstr,
+  ReturnVoid,
+  ReturnValue,
+  Print,
+  /* expression */
   Identifier,
-  UnaryAddSub,
+  IntLiteral,
   CharLiteral,
-  Negation,
-  UnaryDivStar,
-  UnaryOrder,
+  DivStar,
+  Order,
+  AddSub,
+  UnaryAddSub,
   Eq,
   Or,
-  And
+  And,
+  Negation,
   /* and allother node labels */
   /* The list must coincide with the strings in abstract-tree.c */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
