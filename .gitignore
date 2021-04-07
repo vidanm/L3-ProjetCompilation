@@ -1,3 +1,10 @@
-src/test_result
+# executable
 as
+
+# test result
 test_results
+
+# middle files
+*_parser.c
+*_parser.h
+
