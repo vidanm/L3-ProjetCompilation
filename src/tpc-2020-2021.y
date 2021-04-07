@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "abstract-tree.h"
+#include "symbol-table.h"
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -116,13 +117,15 @@ ListTypVar:
 Corps: '{' DeclVars SuiteInstr '}'
      | '{' SuiteInstr '}'
     ;
-Type: TYPE { $$=makeNode(Type); }
-    | STRUCT IDENT { $$=makeNode(Struct); }
+Type: TYPE { $$=makeNode(Type);}
+    | STRUCT IDENT { $$=makeNode(Struct);}
     ;
 SuiteInstr:
        SuiteInstr Instr { $$=$2;
 			  addSibling($$,$1);
-			  printTree($2); }
+			  printTree($2);
+			  /*createTable($2);
+			  printTable();*/ }
     | { $$ = NULL; }
     ;
 Instr:
@@ -244,5 +247,6 @@ int main(void){
 	}
 	if (err)
 		return 1;
+
 	return 0;
-}	
+}

@@ -6,7 +6,7 @@ EXEC=as
 all : $(EXEC) clean
 
 $(EXEC): src/lex.yy.c src/$(EXEC).tab.c src/abstract-tree.c
-	$(CC) src/abstract-tree.c src/lex.yy.c src/$(EXEC).tab.c $(LDFLAGS) -o $(EXEC)
+	$(CC) src/abstract-tree.c src/symbol-table.c src/lex.yy.c src/$(EXEC).tab.c $(LDFLAGS) -o $(EXEC)
 
 src/$(EXEC).tab.c : src/tpc-2020-2021.y
 	bison -d src/tpc-2020-2021.y -o src/$(EXEC).tab.c -ly
