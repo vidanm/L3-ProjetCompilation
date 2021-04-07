@@ -1,6 +1,6 @@
 %{
 #include "abstract-tree.h"
-#include "as.tab.h"
+#include "syntactic_parser.h"
 #include <string.h>
 #include <stdlib.h>
 #undef YY_INPUT
