@@ -64,6 +64,8 @@ Declarateurs:
 DeclChamps :
        DeclChamps SIMPLETYPE Declarateurs ';'
     |  SIMPLETYPE Declarateurs ';'
+    |  DeclChamps STRUCT IDENT Declarateurs ';'
+    |  STRUCT IDENT Declarateurs ';'
     ;
 DeclFoncts:
        DeclFoncts DeclFonct
