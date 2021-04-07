@@ -1,14 +1,12 @@
-Compilation : 
-make
+# Projet de Compilation
 
-Executer les tests :
-cd src/
-./tests.sh
+### Compilation : 
+commande: `make`
 
+### Execution des tests :
+commande: `tests.sh`
 
+Le détail de l'éxécution des tests se trouve dans `test_results`
 
-Le détail de l'éxécution des tests se trouve dans src/test_results
-
-Ne pas executer les tests avant d'avoir compilé.
-
-Le redémarrage après erreur n'étant pas totalement opérationnel ne prendre en compte que la première erreur donnée.
+### Redémarrage Après Erreur
+Le redémarrage après erreur n'étant pas totalement opérationnel, it ne prendre en compte que la première erreur donnée.
