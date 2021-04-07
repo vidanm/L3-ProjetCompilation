@@ -8,6 +8,6 @@ int main ( void ) {
 	}
 	else {
 		x = x + 1;
-	};;;
+	}
 
 }

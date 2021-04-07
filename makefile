@@ -3,16 +3,19 @@ CFLAGS=-Wall -g
 LDFLAGS=-Wall -lfl -ly
 EXEC=as
 
+LEXICAL = src/lexical_parser
+SYNTACTIC = src/syntactic_parser
+
 all : $(EXEC) clean
 
-$(EXEC): src/lex.yy.c src/$(EXEC).tab.c src/abstract-tree.c
-	$(CC) src/abstract-tree.c src/lex.yy.c src/$(EXEC).tab.c $(LDFLAGS) -o $(EXEC)
+$(EXEC): $(LEXICAL).c $(SYNTACTIC).c src/abstract-tree.c
+	$(CC) $^ -o $(EXEC) $(LDFLAGS)
 
-src/$(EXEC).tab.c : src/tpc-2020-2021.y
-	bison -d src/tpc-2020-2021.y -o src/$(EXEC).tab.c -ly
+$(SYNTACTIC).c : $(SYNTACTIC).y
+	bison -d $< -o $@ -ly
 
-src/lex.yy.c: src/$(EXEC).flex
-	flex -o src/lex.yy.c src/$(EXEC).flex
+$(LEXICAL).c: $(LEXICAL).flex
+	flex -o $@ $<
 
 clean :
 	rm -f src/*.tab.c src/*.tab.h src/lex.yy.c
