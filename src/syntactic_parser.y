@@ -15,14 +15,14 @@
 #define EVAL_STR(node, str) strcpy(node->u.identifier, str)
 
 int yylex();
-int yyerror(char *);
+int yyerror(const char *);
 extern int lineno;
 extern char yytext[];
 extern int charno;
 extern char line[200];
 %}
 
-%define parse.error verbose
+/* %define parse.error verbose */
 
 %union{
     int integer;
@@ -39,63 +39,82 @@ extern char line[200];
 %token ADDSUB
 %token DIVSTAR
 %token OR AND STRUCT IF WHILE RETURN VOID PRINT READC READE
-%precedence ')'
-%precedence ELSE
+%left ')'
+%left ELSE
 %type <node> SuiteInstr Instr Exp TB FB M E T F LValue
+%type <node> Prog TypesVars DeclFoncts Declarateurs Type
+%type <node> DeclChamps DeclFonct Arguments ListExp DeclVars
+%type <node> Corps ListTypVar Parametres EnTeteFonct
 
 %%
-Prog:  TypesVars DeclFoncts
-    |  %empty
+Prog:  TypesVars DeclFoncts { $$ = $1;
+    			      addSibling($$,$2);
+			      }
+    |  /* empty */ { $$ = NULL ;}
     ;
 
 TypesVars:
-       TypesVars Type Declarateurs ';'
-    |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';'
-    |  %empty
+       TypesVars Type Declarateurs ';' { $$ = $3;
+					 addSibling($$,$1); }
+    |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';' { $$ = makeNode(Struct);
+						       addSibling($$,$5); }
+    |  /* empty */ { $$ = NULL ;}
     ;
 Type:
-       SIMPLETYPE | STRUCT IDENT
+       SIMPLETYPE  { $$ = makeNode(Type); }
+    | STRUCT IDENT { $$ = makeNode(Type); }
     ;
 Declarateurs:
-       Declarateurs ',' IDENT
-    |  IDENT
+       Declarateurs ',' IDENT { $$ = makeNode(Identifier);
+				addSibling($$,$1); }
+    |  IDENT { $$ = makeNode(Identifier); }
     ;
 
 DeclChamps :
-       DeclChamps SIMPLETYPE Declarateurs ';'
-    |  SIMPLETYPE Declarateurs ';'
-    |  DeclChamps STRUCT IDENT Declarateurs ';'
-    |  STRUCT IDENT Declarateurs ';'
+       DeclChamps SIMPLETYPE Declarateurs ';' { $$ = $3;
+						addSibling($$,$1); }
+    |  SIMPLETYPE Declarateurs ';' { $$ = $2; }
+    |  DeclChamps STRUCT IDENT Declarateurs ';' { $$ = $4;
+						  addSibling($$,$1); }
+    |  STRUCT IDENT Declarateurs ';' { $$ = $3; }
     ;
 DeclFoncts:
-       DeclFoncts DeclFonct
-    |  DeclFonct
+       DeclFoncts DeclFonct { $$ = $2;
+			      addSibling($$,$1);}
+    |  DeclFonct { $$ = $1; }
     ;
 DeclFonct:
-       EnTeteFonct Corps
+       EnTeteFonct Corps { $$ = $1;
+			   addChild($$,$2);}
     ;
 EnTeteFonct:
-       Type IDENT '(' Parametres ')'
-    |  VOID IDENT '(' Parametres ')'
+       Type IDENT '(' Parametres ')' { $$ = makeNode(Identifier);
+				       addSibling($$,$4); }
+    |  VOID IDENT '(' Parametres ')' { $$ = makeNode(Identifier);
+				       addSibling($$,$4); }
     ;
 Parametres:
-       VOID
-    |  ListTypVar
-    |  %empty
+       VOID {$$ = makeNode(Void);}
+    |  ListTypVar {$$ = $1;}
+    |  /* empty */ {$$ = NULL;}
     ;
 ListTypVar:
-       ListTypVar ',' Type IDENT
-    |  Type IDENT
+       ListTypVar ',' Type IDENT { $$ = makeNode(Identifier);
+				   addSibling($$,$1); }
+    |  Type IDENT { $$ = makeNode(Identifier); }
     ;
-Corps: '{' DeclVars SuiteInstr '}'
+Corps: '{' DeclVars SuiteInstr '}' { $$ = $2;
+                                     addSibling($$,$3); }
     ;
 DeclVars:
-       DeclVars Type Declarateurs ';'
-    |  %empty
+       DeclVars Type Declarateurs ';' { $$ = $3;
+				        addSibling($$,$1);}
+    |  /* empty */ { $$ = NULL; }
     ;
 SuiteInstr:
-       SuiteInstr Instr
-    |  %empty
+       SuiteInstr Instr {$$=$2;
+			 addSibling($$,$1);}
+    |  /* empty */ { $$ = NULL; }
     ;
 Instr:
        LValue '=' Exp ';'       {$$ = makeNode(Move); addChild($$, $1); addSibling($1, $3);}
@@ -196,7 +215,8 @@ F  :  ADDSUB F      {$$ = makeNode(UnaryAddSub);
 
     |  LValue       { $$ = $1; }
 
-    |  IDENT '(' Arguments  ')' {/* call function */}
+    |  IDENT '(' Arguments  ')' { $$ = makeNode(Identifier);
+				  strcpy($$->u.identifier,$1);}
     ;
 LValue:
        IDENT            {
@@ -213,17 +233,17 @@ LValue:
         }
     ;
 Arguments:
-       ListExp
-    |  %empty
+       ListExp { $$ = $1; }
+    |  /* empty */ { $$ = NULL; }
     ;
 ListExp:
-       ListExp ',' Exp
-    |  Exp
+       ListExp ',' Exp {$$ = $3; addSibling($$,$1);}
+    |  Exp {$$ = $1;}
     ;
 
 %%
 
-int yyerror(char *s) {
+int yyerror(const char *s) {
 	int j;
 	printf("%s ", s);
 	printf("%d - char %d:\n", lineno, charno);
