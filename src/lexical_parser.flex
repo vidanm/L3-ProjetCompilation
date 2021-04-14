@@ -43,8 +43,13 @@ unsigned int charno=0;
 "*"|"/"|"%"	        { charno += yyleng;return DIVSTAR; }
 "<"|"<="|">"|>=		{ charno += yyleng;return ORDER; }
 ==|!=			{ charno += yyleng;return EQ; }
-int			    { charno += yyleng;return SIMPLETYPE;}
-char		    { charno += yyleng;return SIMPLETYPE;}
+int			    { charno += yyleng;
+			      yylval.integer = 0;	      
+			      return SIMPLETYPE;
+			      }
+char		    { charno += yyleng;
+			yylval.integer = 1;
+			return SIMPLETYPE;}
 print			{ charno += yyleng;return PRINT; }
 readc			{ charno += yyleng;return READC; }
 reade			{ charno += yyleng;return READE; }
@@ -54,9 +59,13 @@ if			    { charno += yyleng;return IF; }
 else			{ charno += yyleng;return ELSE; }
 while			{ charno += yyleng;return WHILE; }
 return		    { charno += yyleng;return RETURN; }
-[a-zA-Z_][a-zA-Z0-9_]*  { charno += yyleng; return IDENT; }
-[0-9]+			        { charno += yyleng; return NUM;}
-'\\?.'			        { charno += yyleng; return CHARACTER; }
+[a-zA-Z_][a-zA-Z0-9_]*  { charno += yyleng; 
+			   strcpy(yylval.identifier,yytext); 
+			   return IDENT; }
+[0-9]+			        { charno += yyleng; 
+				  yylval.integer = atoi(yytext);
+				  return NUM;}
+'\\?.'			        { charno += yyleng; yylval.character = yytext[0]; return CHARACTER; }
 <<EOF>> 				return 0;
 .			            { charno += yyleng; return yytext[0];}
 

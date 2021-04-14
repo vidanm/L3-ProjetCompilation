@@ -26,21 +26,22 @@ extern char line[200];
 
 /* %define parse.error verbose */
 
-%union{
+%union  value {
     int integer;
     char character;
     char identifier[64];
     Node *node;
-}
+};
 
 %token <character>CHARACTER
 %token <integer>NUM
 %token <identifier>IDENT
-%token SIMPLETYPE
+%token <integer>SIMPLETYPE
+%token <integer>STRUCT
 %token ORDER EQ
 %token ADDSUB
 %token DIVSTAR
-%token OR AND STRUCT IF WHILE RETURN VOID PRINT READC READE
+%token OR AND IF WHILE RETURN VOID PRINT READC READE
 %left ')'
 %left ELSE
 %type <node> SuiteInstr Instr Exp TB FB M E T F LValue
@@ -66,20 +67,20 @@ TypesVars:
     |  /* empty */ { $$ = NULL ; }
     ;
 Type:
-       SIMPLETYPE  {  $$ = makeNode(Type);  }
-    | STRUCT IDENT {  $$ = makeNode(Type); }
+       SIMPLETYPE  {  $$ = makeNode(Type); current_type = $1;}
+    | STRUCT IDENT {  $$ = makeNode(Type); current_type = $1;}
     ;
 Declarateurs:
        Declarateurs ',' IDENT { $$ = makeNode(Identifier);
 				addSibling($$,$1);
-				addVar($3,1);} 
-    |  IDENT { $$ = makeNode(Identifier); addVar($1,1); }
+				addVar($3,current_type);} 
+    |  IDENT { $$ = makeNode(Identifier); addVar($1,current_type); }
     ;
 
 DeclChamps :
        DeclChamps SIMPLETYPE Declarateurs ';' { $$ = $3;
 						addSibling($$,$1); }
-    |  SIMPLETYPE Declarateurs ';' { $$ = $2; }
+    |  SIMPLETYPE Declarateurs ';' { current_type = $1; $$ = $2; }
     |  DeclChamps STRUCT IDENT Declarateurs ';' { $$ = $4;
 						  addSibling($$,$1); }
     |  STRUCT IDENT Declarateurs ';' { $$ = $3; }
@@ -116,7 +117,8 @@ Corps: '{' DeclVars SuiteInstr '}' { $$ = $3;
     ;
 DeclVars:
        DeclVars Type Declarateurs ';' { $$ = $3;
-				        addChild($$,$1);}
+				        addChild($$,$1);
+					}
     |  /* empty */ { $$ = NULL; }
     ;
 SuiteInstr:
