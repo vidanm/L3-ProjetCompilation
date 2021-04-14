@@ -47,8 +47,11 @@ extern char line[200];
 %type <node> Corps ListTypVar Parametres EnTeteFonct
 
 %%
-Prog:  TypesVars DeclFoncts { $$ = $1;
-    			      addSibling($$,$2);
+Prog:  TypesVars DeclFoncts { 
+    			      $$ = $2;
+    			      if ($1 != NULL) { 
+    			      addSibling($$,$1);
+			      } printTree($$); 
 			      }
     |  /* empty */ { $$ = NULL ;}
     ;
@@ -58,15 +61,15 @@ TypesVars:
 					 addSibling($$,$1); }
     |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';' { $$ = makeNode(Struct);
 						       addSibling($$,$5); }
-    |  /* empty */ { $$ = NULL ;}
+    |  /* empty */ { $$ = NULL ; }
     ;
 Type:
-       SIMPLETYPE  { $$ = makeNode(Type); }
-    | STRUCT IDENT { $$ = makeNode(Type); }
+       SIMPLETYPE  {  $$ = makeNode(Type);  }
+    | STRUCT IDENT {  $$ = makeNode(Type); }
     ;
 Declarateurs:
        Declarateurs ',' IDENT { $$ = makeNode(Identifier);
-				addSibling($$,$1); }
+				addSibling($$,$1); } 
     |  IDENT { $$ = makeNode(Identifier); }
     ;
 
@@ -80,23 +83,23 @@ DeclChamps :
     ;
 DeclFoncts:
        DeclFoncts DeclFonct { $$ = $2;
-			      addSibling($$,$1);}
+			      addSibling($$,$1); }
     |  DeclFonct { $$ = $1; }
     ;
 DeclFonct:
        EnTeteFonct Corps { $$ = $1;
-			   addChild($$,$2);}
+			   addChild($$,$2); }
     ;
 EnTeteFonct:
        Type IDENT '(' Parametres ')' { $$ = makeNode(Identifier);
-				       addSibling($$,$4); }
+				       addChild($$,$4);}
     |  VOID IDENT '(' Parametres ')' { $$ = makeNode(Identifier);
-				       addSibling($$,$4); }
+				       addChild($$,$4); }
     ;
 Parametres:
-       VOID {$$ = makeNode(Void);}
-    |  ListTypVar {$$ = $1;}
-    |  /* empty */ {$$ = NULL;}
+       VOID { $$ = makeNode(Void); }
+    |  ListTypVar { $$ = $1; }
+    |  /* empty */ {$$ = makeNode(Void);}
     ;
 ListTypVar:
        ListTypVar ',' Type IDENT { $$ = makeNode(Identifier);
@@ -104,16 +107,18 @@ ListTypVar:
     |  Type IDENT { $$ = makeNode(Identifier); }
     ;
 Corps: '{' DeclVars SuiteInstr '}' { $$ = $2;
-                                     addSibling($$,$3); }
+                                     addChild($$,$3); 
+				     /* l'erreur de seg vient d'ici  */ } 
     ;
 DeclVars:
        DeclVars Type Declarateurs ';' { $$ = $3;
-				        addSibling($$,$1);}
+				        addChild($$,$1);}
     |  /* empty */ { $$ = NULL; }
     ;
 SuiteInstr:
-       SuiteInstr Instr {$$=$2;
-			 addSibling($$,$1);}
+       SuiteInstr Instr { $$=$2;
+			if ($1 != NULL)  
+			addSibling($$,$1);}
     |  /* empty */ { $$ = NULL; }
     ;
 Instr:
