@@ -10,7 +10,7 @@ TEST_SCRIPT = tests.sh
 
 all : $(EXEC) clean
 
-$(EXEC): $(LEXICAL).c $(SYNTACTIC).c src/abstract-tree.c
+$(EXEC): $(LEXICAL).c $(SYNTACTIC).c src/abstract-tree.c src/symbol-table.c
 	$(CC) $^ -o $(EXEC) $(LDFLAGS)
 
 $(SYNTACTIC).c : $(SYNTACTIC).y

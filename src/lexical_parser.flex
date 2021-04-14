@@ -1,6 +1,7 @@
 %{
 #include "abstract-tree.h"
 #include "syntactic_parser.h"
+#include "symbol-table.h"
 #include <string.h>
 #include <stdlib.h>
 #undef YY_INPUT

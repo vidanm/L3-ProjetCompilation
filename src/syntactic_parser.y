@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "abstract-tree.h"
+#include "symbol-table.h"
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -16,6 +17,7 @@
 
 int yylex();
 int yyerror(const char *);
+int current_type;
 extern int lineno;
 extern char yytext[];
 extern int charno;
@@ -51,7 +53,7 @@ Prog:  TypesVars DeclFoncts {
     			      $$ = $2;
     			      if ($1 != NULL) { 
     			      addSibling($$,$1);
-			      } printTree($$); 
+			      } printTree($$); printTable();
 			      }
     |  /* empty */ { $$ = NULL ;}
     ;
@@ -69,8 +71,9 @@ Type:
     ;
 Declarateurs:
        Declarateurs ',' IDENT { $$ = makeNode(Identifier);
-				addSibling($$,$1); } 
-    |  IDENT { $$ = makeNode(Identifier); }
+				addSibling($$,$1);
+				addVar($3,1);} 
+    |  IDENT { $$ = makeNode(Identifier); addVar($1,1); }
     ;
 
 DeclChamps :
@@ -109,7 +112,7 @@ ListTypVar:
 Corps: '{' DeclVars SuiteInstr '}' { $$ = $3;
                                      if ($2 != NULL)
 					addSibling($$,$2); 
-				     /* l'erreur de seg vient d'ici  */ } 
+				     }
     ;
 DeclVars:
        DeclVars Type Declarateurs ';' { $$ = $3;
