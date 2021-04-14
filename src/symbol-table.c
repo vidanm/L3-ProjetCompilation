@@ -4,6 +4,12 @@
 #include "abstract-tree.h"
 #include "symbol-table.h"
 
+static const char *StringFromType[] = {
+	"int",
+	"char",
+	"struct"
+};
+
 STentry symbolTable[MAXSYMBOLS];
 int STmax = MAXSYMBOLS;
 int STsize = 0;
@@ -32,9 +38,9 @@ void printTable(){
 	int count;
 	printf("TABLE DES SYMBOLES\n------------\n");
 	for (count = 0; count < STsize; count++)
-		printf("%s : %d\n",
-			symbolTable[count].name,
-			symbolTable[count].type
+		printf("%s : %s\n",
+			StringFromType[symbolTable[count].type],
+			symbolTable[count].name
 		      );
 }
 
