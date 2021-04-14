@@ -106,8 +106,9 @@ ListTypVar:
 				   addSibling($$,$1); }
     |  Type IDENT { $$ = makeNode(Identifier); }
     ;
-Corps: '{' DeclVars SuiteInstr '}' { $$ = $2;
-                                     addChild($$,$3); 
+Corps: '{' DeclVars SuiteInstr '}' { $$ = $3;
+                                     if ($2 != NULL)
+					addSibling($$,$2); 
 				     /* l'erreur de seg vient d'ici  */ } 
     ;
 DeclVars:
