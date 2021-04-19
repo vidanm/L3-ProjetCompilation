@@ -32,7 +32,8 @@ typedef enum {
   Type,
   Void,
   Func,
-  ListTypVar
+  ListTypVar,
+  VarDeclaration
   /* and allother node labels */
   /* The list must coincide with the strings in abstract-tree.c */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */

@@ -36,24 +36,18 @@ void addVar(const char name[], int type)
 }
 
 void createTable(Node *node){
-	switch (node -> kind){
-		case Identifier: addVar(node->u.identifier,current_type);break;
-		case Type: current_type = node->u.integer;break;:wq
-			   :w
-		default:break;
-	}
-	if (node->firstChild != NULL)
-		createTable(node->firstChild);
 
-   	while (node->nextSibling != NULL){
-		node = node->nextSibling;
+	while (node != NULL){
 		switch (node -> kind){
-				case Identifier: addVar(node->u.identifier,current_type);break;
-				case Type: current_type = node->u.integer;break;
-				default:break;
-		if (node->firstChild != NULL)
-			createTable(node->firstChild);
+			case VarDeclaration: addVar(node->u.identifier,current_type);break;
+			case Type: current_type = node->u.integer;break;
+			default:break;
 		}
+		
+		if (node -> firstChild != NULL)
+			createTable(node->firstChild);
+
+		node = node->nextSibling;
 	}
 }
 

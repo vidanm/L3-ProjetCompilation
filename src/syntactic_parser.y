@@ -17,7 +17,6 @@
 
 int yylex();
 int yyerror(const char *);
-int current_type;
 extern int lineno;
 extern char yytext[];
 extern int charno;
@@ -72,11 +71,11 @@ Type:
     | STRUCT IDENT {  $$ = makeNode(Type); $$->u.integer = $1;}
     ;
 Declarateurs:
-       Declarateurs ',' IDENT { $$ = makeNode(Identifier);
+       Declarateurs ',' IDENT { $$ = makeNode(VarDeclaration);
 				addSibling($$,$1);
 				strcpy($$->u.identifier,$3);
 				} 
-    |  IDENT { $$ = makeNode(Identifier); strcpy($$->u.identifier,$1);}
+    |  IDENT { $$ = makeNode(VarDeclaration); strcpy($$->u.identifier,$1);}
     ;
 
 DeclChamps :
@@ -110,12 +109,12 @@ Parametres:
 ListTypVar:
        ListTypVar ',' Type IDENT { $$ = makeNode(ListTypVar);
 				   addChild($$,$3);
-				   Node *n = makeNode(Identifier);
+				   Node *n = makeNode(VarDeclaration);
 				   strcpy(n->u.identifier,$4);
 				   addSibling($3,n);
 				   addSibling($$,$1); }
     |  Type IDENT { $$ = $1;
-		   Node *n = makeNode(Identifier);
+		   Node *n = makeNode(VarDeclaration);
 		   strcpy(n->u.identifier,$2); 
 		   addChild($$,n);}
     ;
@@ -187,7 +186,9 @@ FB  :  FB EQ M      {
     	addChild($$,$1);
 		addSibling($1,$3);
 	}
-    |  M        { $$ = $1; }
+    |  M
+
+{ $$ = $1; }
     ;
 
 M   :  M ORDER E    {   
