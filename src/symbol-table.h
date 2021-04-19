@@ -7,5 +7,6 @@ typedef struct {
 } STentry;
 
 void addVar(const char name[],int type);
+void createTable();
 void printTable();
 void createTable(Node *node);

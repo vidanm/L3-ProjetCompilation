@@ -13,6 +13,7 @@ static const char *StringFromType[] = {
 STentry symbolTable[MAXSYMBOLS];
 int STmax = MAXSYMBOLS;
 int STsize = 0;
+int current_type = 0;
 
 void addVar(const char name[], int type)
 {
@@ -34,6 +35,28 @@ void addVar(const char name[], int type)
 	symbolTable[STsize-1].type = type;
 }
 
+void createTable(Node *node){
+	switch (node -> kind){
+		case Identifier: addVar(node->u.identifier,current_type);break;
+		case Type: current_type = node->u.integer;break;:wq
+			   :w
+		default:break;
+	}
+	if (node->firstChild != NULL)
+		createTable(node->firstChild);
+
+   	while (node->nextSibling != NULL){
+		node = node->nextSibling;
+		switch (node -> kind){
+				case Identifier: addVar(node->u.identifier,current_type);break;
+				case Type: current_type = node->u.integer;break;
+				default:break;
+		if (node->firstChild != NULL)
+			createTable(node->firstChild);
+		}
+	}
+}
+
 void printTable(){
 	int count;
 	printf("TABLE DES SYMBOLES\n------------\n");
@@ -44,7 +67,7 @@ void printTable(){
 		      );
 }
 
-/* Incorrect, les cas ne sont pas les bons*/
+/* Incorrect, les cas ne sont pas les bons
 void createTable(Node *node){
 	switch(node -> kind){
 		case IntLiteral: addVar(node->u.identifier,
@@ -61,4 +84,4 @@ void createTable(Node *node){
 	for (Node *child = node->firstChild; child != NULL; child = child-> nextSibling) {
 		createTable(child);
 	}
-}
+}*/

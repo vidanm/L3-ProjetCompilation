@@ -33,7 +33,9 @@ static const char *StringFromKind[] = {
   "Negation",
   "Struct",
   "Type",
-  "Void"
+  "Void",
+  "Func",
+  "ListTypVar"
   /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
