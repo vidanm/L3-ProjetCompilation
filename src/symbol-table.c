@@ -51,17 +51,29 @@ void createTable(Node *node){
 	}
 }
 
-int isInTable(const char name[])
+void isInTable(Node *node)
 {
 	int count;
-	for (count = 0; count < STsize; count++){
-		if (strcmp(symbolTable[count].name, name))
-		{
-			printf("La variable %s n'a pas été déclaré", name);
-			return 0;
+	while (node != NULL){
+		switch (node -> kind){
+			case Identifier:
+				for (count = 0; count < STsize; count++){
+					if (!strcmp(symbolTable[count].name, node->u.identifier))
+					{
+						break;
+					}
+				}
+				if (count > STsize -1)
+					printf("La variable %s n'a pas été déclaré\n", node->u.identifier);
+				break;
+			default:
+				break;
 		}
+		if (node -> firstChild != NULL)
+			isInTable(node->firstChild);
+
+		node = node->nextSibling;
 	}
-	return 1;
 }
 
 void printTable(){

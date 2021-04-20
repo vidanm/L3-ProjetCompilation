@@ -54,7 +54,7 @@ Prog:  TypesVars DeclFoncts {
     			      if ($1 != NULL) {
 			         printTree($1);
     			         addSibling($$,$1);
-			      } printTree($$); createTable($$); printTable();
+			      } printTree($$); createTable($$); printTable(); isInTable($$); 
 			      }
     |  /* empty */ { $$ = NULL ;}
     ;
@@ -237,7 +237,8 @@ F  :  ADDSUB F      {$$ = makeNode(UnaryAddSub);
     |  '!' F        {$$ = makeNode(Negation);
                     addChild($$, $2); }
 
-    |  '&' IDENT    { /* pointer */}
+    |  '&' IDENT    { $$ = makeNode(Identifier);
+		      strcpy($$->u.identifier,$2); /* pointer */}
 
     |  '(' Exp ')'  { $$ = $2; }
 
