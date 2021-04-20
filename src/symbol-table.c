@@ -51,6 +51,19 @@ void createTable(Node *node){
 	}
 }
 
+int isInTable(const char name[])
+{
+	int count;
+	for (count = 0; count < STsize; count++){
+		if (strcmp(symbolTable[count].name, name))
+		{
+			printf("La variable %s n'a pas été déclaré", name);
+			return 0;
+		}
+	}
+	return 1;
+}
+
 void printTable(){
 	int count;
 	printf("TABLE DES SYMBOLES\n------------\n");
@@ -61,21 +74,3 @@ void printTable(){
 		      );
 }
 
-/* Incorrect, les cas ne sont pas les bons
-void createTable(Node *node){
-	switch(node -> kind){
-		case IntLiteral: addVar(node->u.identifier,
-					node->kind);
-				 break;
-		case CharLiteral: addVar(node->u.identifier,
-					 node->kind);
-				  break;
-		case Identifier: addVar(node->u.identifier,
-					node->kind);
-				 break;
-		default: break;
-	}
-	for (Node *child = node->firstChild; child != NULL; child = child-> nextSibling) {
-		createTable(child);
-	}
-}*/

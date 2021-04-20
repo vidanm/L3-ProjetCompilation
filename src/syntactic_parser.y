@@ -51,8 +51,9 @@ extern char line[200];
 %%
 Prog:  TypesVars DeclFoncts { 
     			      $$ = $2;
-    			      if ($1 != NULL) { 
-    			      addSibling($$,$1);
+    			      if ($1 != NULL) {
+			         printTree($1);
+    			         addSibling($$,$1);
 			      } printTree($$); createTable($$); printTable();
 			      }
     |  /* empty */ { $$ = NULL ;}
@@ -60,10 +61,15 @@ Prog:  TypesVars DeclFoncts {
 
 TypesVars:
        TypesVars Type Declarateurs ';' { $$ = $2;
-					 addSibling($$,$1);
+					 if ($1 != NULL)
+					 	addSibling($$,$1);
 					 addChild($$,$3); }
-    |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';' { $$ = makeNode(Struct);
-						       addSibling($$,$5); }
+
+    |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';' { $$ = makeNode(DeclStruct);
+						       strcpy($$->u.identifier,$3);
+						       if ($1 != NULL)
+							  {addSibling($$,$1);}
+							addChild($$,$5); }
     |  /* empty */ { $$ = NULL ; }
     ;
 Type:
@@ -79,12 +85,14 @@ Declarateurs:
     ;
 
 DeclChamps :
-       DeclChamps SIMPLETYPE Declarateurs ';' { $$ = $3;
+       DeclChamps SIMPLETYPE Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $2;
+						addChild($$,$3);
 						addSibling($$,$1); }
     |  SIMPLETYPE Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $1; addChild($$,$2); }
-    |  DeclChamps STRUCT IDENT Declarateurs ';' { $$ = $4;
+    |  DeclChamps STRUCT IDENT Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $2;
+						  addChild($$,$4);
 						  addSibling($$,$1); }
-    |  STRUCT IDENT Declarateurs ';' { $$ = $3; }
+    |  STRUCT IDENT Declarateurs ';' {$$ = makeNode(Type); $$->u.integer = $1; addChild($$,$3); }
     ;
 DeclFoncts:
        DeclFoncts DeclFonct { $$ = $2;
@@ -97,9 +105,11 @@ DeclFonct:
     ;
 EnTeteFonct:
        Type IDENT '(' Parametres ')' { $$ = makeNode(Func);
-				       addChild($$,$4);}
+				       if ($4 != NULL)
+				       	addSibling($$,$4);}
     |  VOID IDENT '(' Parametres ')' { $$ = makeNode(Func);
-				       addChild($$,$4); }
+					if ($4 != NULL)
+				       addSibling($$,$4); }
     ;
 Parametres:
        VOID { $$ = makeNode(Void); }
@@ -109,19 +119,23 @@ Parametres:
 ListTypVar:
        ListTypVar ',' Type IDENT { $$ = makeNode(ListTypVar);
 				   addChild($$,$3);
-				   Node *n = makeNode(VarDeclaration);
+				   Node *n = makeNode(Identifier);
 				   strcpy(n->u.identifier,$4);
 				   addSibling($3,n);
 				   addSibling($$,$1); }
     |  Type IDENT { $$ = $1;
-		   Node *n = makeNode(VarDeclaration);
+		   Node *n = makeNode(Identifier);
 		   strcpy(n->u.identifier,$2); 
 		   addChild($$,n);}
     ;
-Corps: '{' DeclVars SuiteInstr '}' { $$ = $3;
-                                     if ($2 != NULL)
-					addSibling($$,$2); 
-				     }
+Corps: '{' DeclVars SuiteInstr '}' { if ($3 != NULL){ /* PROBLEME ICI */
+     				     	$$ = $3;
+                                     	if ($2 != NULL){
+						addSibling($$,$2); 
+				     	}
+				     } else if ($2 != NULL){
+					$$ = $2;
+					} else { $$ = NULL; } }
     ;
 DeclVars:
        DeclVars Type Declarateurs ';' { $$ = $2;

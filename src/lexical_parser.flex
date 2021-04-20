@@ -54,7 +54,7 @@ print			{ charno += yyleng;return PRINT; }
 readc			{ charno += yyleng;return READC; }
 reade			{ charno += yyleng;return READE; }
 void			{ charno += yyleng;return VOID; }
-struct		    { charno += yyleng;return STRUCT; }
+struct		    { charno += yyleng;yylval.integer = 2; return STRUCT;}
 if			    { charno += yyleng;return IF; }
 else			{ charno += yyleng;return ELSE; }
 while			{ charno += yyleng;return WHILE; }

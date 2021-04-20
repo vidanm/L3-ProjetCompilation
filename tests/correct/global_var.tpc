@@ -1,0 +1,7 @@
+int x;
+int a;
+char symbol;
+
+int main(void){
+	return a;
+}

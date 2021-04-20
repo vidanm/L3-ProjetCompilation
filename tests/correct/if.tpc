@@ -1,5 +1,6 @@
 int main ( void ) {
 	
+	int x;
 	if ( x < 5 ) {
 		x = x + 5;
 	}
