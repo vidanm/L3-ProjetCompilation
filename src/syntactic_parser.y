@@ -286,8 +286,12 @@ int yyerror(const char *s) {
 	printf("%s ", s);
 	printf("%d - char %d:\n", lineno, charno);
 	printf("%s\n",line);
-	for (j=0;j<charno;j++)
-		printf(" ");
+	for (j=0;j<charno;j++){
+		if (line[j] == '\t')
+			printf("\t");
+		else
+			printf(" ");
+	}
 	printf("^\n");
 	return 1;
 }

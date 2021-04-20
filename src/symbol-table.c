@@ -64,7 +64,7 @@ void isInTable(Node *node)
 					}
 				}
 				if (count > STsize -1)
-					printf("La variable %s n'a pas été déclaré\n", node->u.identifier);
+					printf("\x1b[31mUtilisation de la variable %s sans l'avoir déclaré\x1b[0m \n", node->u.identifier);
 				break;
 			default:
 				break;
