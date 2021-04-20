@@ -5,6 +5,7 @@
 #include "symbol-table.h"
 
 static const char *StringFromType[] = {
+	"void",
 	"int",
 	"char",
 	"struct"
@@ -21,7 +22,7 @@ void addVar(const char name[], int type)
 	for (count = 0; count < STsize; count++){
 		if (!strcmp(symbolTable[count].name, name))
 		{
-			printf("redefinition de la variable %s pres de la ligne", name);
+			printf("redefinition de la variable %s pres de la ligne\n", name);
 			return;
 		}
 	}
@@ -41,6 +42,7 @@ void createTable(Node *node){
 		switch (node -> kind){
 			case VarDeclaration: addVar(node->u.identifier,current_type);break;
 			case Type: current_type = node->u.integer;break;
+			case ReturnType: current_type = node->u.integer;break;
 			default:break;
 		}
 		

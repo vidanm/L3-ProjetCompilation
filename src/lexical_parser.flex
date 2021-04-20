@@ -44,17 +44,17 @@ unsigned int charno=0;
 "<"|"<="|">"|>=		{ charno += yyleng;return ORDER; }
 ==|!=			{ charno += yyleng;return EQ; }
 int			    { charno += yyleng;
-			      yylval.integer = 0;	      
+			      yylval.integer = 1;	      
 			      return SIMPLETYPE;
 			      }
 char		    { charno += yyleng;
-			yylval.integer = 1;
+			yylval.integer = 2;
 			return SIMPLETYPE;}
 print			{ charno += yyleng;return PRINT; }
 readc			{ charno += yyleng;return READC; }
 reade			{ charno += yyleng;return READE; }
-void			{ charno += yyleng;return VOID; }
-struct		    { charno += yyleng;yylval.integer = 2; return STRUCT;}
+void			{ charno += yyleng;yylval.integer = 0;return VOID; }
+struct		    { charno += yyleng;yylval.integer = 3; return STRUCT;}
 if			    { charno += yyleng;return IF; }
 else			{ charno += yyleng;return ELSE; }
 while			{ charno += yyleng;return WHILE; }

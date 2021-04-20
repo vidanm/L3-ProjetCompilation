@@ -37,10 +37,21 @@ static const char *StringFromKind[] = {
   "Func",
   "ListTypVar",
   "VarDeclaration",
-  "DeclStruct"
-  /* and all other node labels */
+  "DeclStruct",
+  "Parameter",
+  "ReturnType",
+  "Corps"
+  
+	  /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
+};
+
+static const char *StringFromType[] = {
+	"void",
+	"int",
+	"char",
+	"struct"
 };
 
 Node *makeNode(Kind kind) {
@@ -93,6 +104,9 @@ void printTree(Node *node) {
   }
   printf("%s", StringFromKind[node->kind]);
   switch (node->kind) {
+    case VarDeclaration: printf(": %s",node->u.identifier);break;
+    case Type: printf(": %s",StringFromType[node->u.integer]);break;
+    case ReturnType: printf(": %s",StringFromType[node->u.integer]);break;
     case IntLiteral: printf(": %d", node->u.integer); break;
     case CharLiteral: printf(": '%c'", node->u.character); break;
     case Identifier: printf(": %s", node->u.identifier); break;
