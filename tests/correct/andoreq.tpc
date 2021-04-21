@@ -1,8 +1,8 @@
 int main (void){
-
+	int x;
+	x = 1;
 	if (x && y || z == a)
 		return 1;
 	else 
-		return 0;;
- 
+		return 0;
 }

@@ -2,12 +2,25 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "abstract-tree.h"
 extern int lineno;       /* from lexer */
 
 static const char *StringFromKind[] = {
   "Program",
   "VarDeclList",
+  /* declaration */
+  "GlobeVar",
+  "TypeSimp",
+  "TypeStruct",
+  "DeclVar",
+  "DeclChamp",
+  "DefStruct",
+  "DefFunct",
+  "DefFunctHead",
+  "DefFunctCorps",
+  "ParaTypVar",
+  /* instructions */
   "Move",
   "InstrIF",
   "InstrIFELSE",
@@ -16,10 +29,10 @@ static const char *StringFromKind[] = {
   "InstrReadC",
   "InstrPrint",
   "Instructions",
-  "EmptyInstr",
   "ReturnVoid",
   "ReturnValue",
   "Print",
+  /* expression */
   "Identifier",
   "IntLiteral",
   "CharLiteral",
@@ -33,7 +46,8 @@ static const char *StringFromKind[] = {
   "Negation",
   "Struct",
   "Type",
-  "Void"
+  "Void",
+  "Call"
   /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
@@ -78,6 +92,10 @@ void deleteTree(Node *node) {
   free(node);
 }
 
+void set_identifier(Node *node, char *identifier){
+  strcpy(node->u.identifier,identifier);
+}
+
 void printTree(Node *node) {
   static bool rightmost[128]; // current node is rightmost sibling
   static int depth = 0;       // depth of current node
@@ -92,6 +110,9 @@ void printTree(Node *node) {
     case IntLiteral: printf(": %d", node->u.integer); break;
     case CharLiteral: printf(": '%c'", node->u.character); break;
     case Identifier: printf(": %s", node->u.identifier); break;
+    case TypeSimp: printf(": %s", node->u.identifier); break;
+    case DefFunctHead: printf(": %s", node->u.identifier); break;
+    case Call: printf(": %s", node->u.identifier); break;
     default: break;
   }
   printf("\n");

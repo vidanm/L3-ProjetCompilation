@@ -3,6 +3,17 @@
 typedef enum {
   Program,
   VarDeclList,
+  /* declaration */
+  GlobeVar,
+  TypeSimp,
+  TypeStruct,
+  DeclVar,
+  DeclChamp,
+  DefStruct,
+  DefFunct,
+  DefFunctHead,
+  DefFunctCorps,
+  ParaTypVar,
   /* instructions */
   Move,
   InstrIF,
@@ -12,7 +23,6 @@ typedef enum {
   InstrReadC,
   InstrPrint,
   Instructions,
-  EmptyInstr,
   ReturnVoid,
   ReturnValue,
   Print,
@@ -30,8 +40,9 @@ typedef enum {
   Negation,
   Struct,
   Type,
-  Void
-  /* and allother node labels */
+  Void,
+  Call
+  /* and all other node labels */
   /* The list must coincide with the strings in abstract-tree.c */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
 } Kind;
@@ -47,12 +58,48 @@ typedef struct Node {
   int lineno;
 } Node;
 
+/**
+ * Given the kind of node, makes a node of abstract tree.
+ */
 Node *makeNode(Kind kind);
+
+/**
+ * Given 2 nodes, add the second as sibling for the first one.
+ */
 void addSibling(Node *node, Node *sibling);
+
+/**
+ * Add a child for another node.
+ */
 void addChild(Node *parent, Node *child);
+
+/**
+ * Set a string value for the node in the parametre.
+ * Normally the string is an identifier.
+ */
+void set_identifier(Node *node, char *identifier);
+
+/**
+ * Delete the tree, and its childs recursively.
+ */ 
 void deleteTree(Node*node);
+
+/**
+ * Print the node and its childs to the stdout recursively.
+ */
 void printTree(Node *node);
 
+/**
+ * Macro to access the first child.
+ */
 #define FIRSTCHILD(node) node->firstChild
+
+/**
+ * Macro to access the second child.
+ */
 #define SECONDCHILD(node) node->firstChild->nextSibling
+
+/**
+ * Macro to access the third child.
+ */
 #define THIRDCHILD(node) node->firstChild->nextSibling->nextSibling

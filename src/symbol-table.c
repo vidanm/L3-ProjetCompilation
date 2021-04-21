@@ -14,7 +14,7 @@ void addVar(const char name[], int type)
 	for (count = 0; count < STsize; count++){
 		if (!strcmp(symbolTable[count].name, name))
 		{
-			printf("redefinition de la variable %s pres de la ligne", name);
+			printf("redefinition de la variable %s pres de la ligne\n", name);
 			return;
 		}
 	}
