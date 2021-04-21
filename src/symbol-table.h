@@ -1,5 +1,6 @@
 #define MAXSYMBOLS 256
 #define MAXNAME 64
+#define MAXTABLES 128
 
 typedef struct {
 	char name[MAXNAME];

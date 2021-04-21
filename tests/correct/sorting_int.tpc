@@ -4,7 +4,7 @@ int greater_than(int a,int b){
 
 int main(void){
 	int ad ;
-	int aa ;
+	int ba ;
 	ad = 5 ;
  	ba = 6 ;
 	return greater_than(ad,ba);

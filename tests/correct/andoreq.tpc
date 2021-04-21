@@ -1,5 +1,5 @@
 int main (void){
-
+	int x,y,z,a;
 	if (x && y || z == a)
 		return 1;
 	else 

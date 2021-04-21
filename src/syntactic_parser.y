@@ -111,28 +111,30 @@ DeclFonct:
 			   Node *n = makeNode(Corps);
 			   addChild(n,$2);
 			   addSibling($1,n);
-			   addChild($$,$1);}
+			   addChild($$,$1);
+			   Node *end = makeNode(EndFunc);
+			   addSibling($$,end);}
     ;
 EnTeteFonct:
-       Type IDENT '(' Parametres ')' { $$ = makeNode(ReturnType);
-				       $$->u.integer = $1->u.integer;
-				       Node *n = makeNode(VarDeclaration);
-				       strcpy(n->u.identifier,$2);
+       Type IDENT '(' Parametres ')' { $$ = makeNode(VarDeclaration);
+				       strcpy($$->u.identifier,$2);
+				       Node *n = makeNode(ReturnType);
+				       n->u.integer = $1->u.integer;
 				       addSibling($$,n);
 				       if ($4 != NULL)
 				       	addSibling($$,$4);}
-    |  VOID IDENT '(' Parametres ')' { $$ = makeNode(ReturnType);
-					$$->u.integer = $1;
-					Node *n = makeNode(VarDeclaration);
-				       strcpy(n->u.identifier,$2);
+    |  VOID IDENT '(' Parametres ')' { $$ = makeNode(VarDeclaration);
+				       strcpy($$->u.identifier,$2);
+				       Node *n = makeNode(ReturnType);
+				       n->u.integer = $1;
 				       addSibling($$,n);
 				       if ($4 != NULL)
 				       addSibling($$,$4); }
     ;
 Parametres:
-       VOID { $$ = NULL; }
+       VOID { $$ = makeNode(Parameter); }
     |  ListTypVar { $$ = makeNode(Parameter); addChild($$,$1); }
-    |  /* empty */ {$$ = NULL;}
+    |  /* empty */ {$$ = makeNode(Parameter);}
     ;
 ListTypVar:
        ListTypVar ',' Type IDENT { $$ = $3;

@@ -37,7 +37,8 @@ typedef enum {
   DeclStruct,
   Parameter,
   ReturnType,
-  Corps
+  Corps,
+  EndFunc
   /* and allother node labels */
   /* The list must coincide with the strings in abstract-tree.c */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
