@@ -11,7 +11,7 @@ static const char *StringFromType[] = {
 	"struct"
 };
 
-STentry* symbolTable[MAXTABLES];
+STentry* symbolTable[MAXTABLES]; /* Tableau d'adresses vers les tables globales/locales */
 
 int STmax = MAXSYMBOLS; 
 int STSize[MAXTABLES]; /* Nombres de symboles dans les tables */

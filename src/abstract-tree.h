@@ -32,7 +32,6 @@ typedef enum {
   Type,
   Void,
   Func,
-  ListTypVar,
   VarDeclaration,
   DeclStruct,
   Parameter,

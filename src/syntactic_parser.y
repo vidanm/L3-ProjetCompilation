@@ -51,16 +51,14 @@ extern char line[200];
 
 %%
 Prog:  TypesVars DeclFoncts { 
-    			      $$ = $2;
+			      $$ = makeNode(Program);
     			      if ($1 != NULL) {
-			         printTree($1);
-    			         addSibling($$,$1);
-			      } 
-				Node *n = $$; 
-				while (n != NULL){
-					printTree(n);
-					n = n->nextSibling;
-				}
+    			         addSibling($1,$2);
+				 addChild($$,$1);
+			      } else 
+			      		addChild($$,$2);
+				
+				printTree($$); 
 				createTable($$); printTable(); isInTable($$); 
 			      }
     |  /* empty */ { $$ = NULL ;}
@@ -102,8 +100,8 @@ DeclChamps :
     |  STRUCT IDENT Declarateurs ';' {$$ = makeNode(Type); $$->u.integer = $1; addChild($$,$3); }
     ;
 DeclFoncts:
-       DeclFoncts DeclFonct { $$ = $2;
-			      addSibling($$,$1); }
+       DeclFoncts DeclFonct { $$ = $1;
+			      addSibling($$,$2); }
     |  DeclFonct { $$ = $1; }
     ;
 DeclFonct:
@@ -147,13 +145,13 @@ ListTypVar:
 		   strcpy(n->u.identifier,$2); 
 		   addChild($$,n);}
     ;
-Corps: '{' DeclVars SuiteInstr '}' { if ($3 != NULL){ 
-     				     	$$ = $3;
-                                     	if ($2 != NULL){
-						addSibling($$,$2); 
+Corps: '{' DeclVars SuiteInstr '}' { if ($2 != NULL){ 
+     				     	$$ = $2;
+                                     	if ($3 != NULL){
+						addSibling($$,$3); 
 				     	}
-				     } else if ($2 != NULL){
-					$$ = $2;
+				     } else if ($3 != NULL){
+					$$ = $3;
 					} else { $$ = NULL; }
 				     }
     ;

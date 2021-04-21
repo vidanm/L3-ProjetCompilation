@@ -35,7 +35,6 @@ static const char *StringFromKind[] = {
   "Type",
   "Void",
   "Func",
-  "ListTypVar",
   "VarDeclaration",
   "DeclStruct",
   "Parameter",
