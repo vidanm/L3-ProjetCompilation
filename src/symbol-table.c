@@ -68,7 +68,9 @@ void createTable(Node *node){
 			case Type: current_type = node->u.integer;break;
 			case ReturnType: current_type = node->u.integer;break;
 			case Parameter: appendST(); break;
-			case EndFunc: printTable(); popST(); break;
+			case End: printTable(); popST(); break;
+			case DeclStruct: addVar(node->u.identifier,current_type); appendST(); break;
+			case Identifier: isInTable(node->u.identifier);
 			default:break;
 		}
 		
@@ -79,35 +81,25 @@ void createTable(Node *node){
 	}
 }
 
-void isInTable(Node *node)
+void isInTable(const char name[])
 {
 	/* Ne vérifie que la présence des variables dans la table de symboles de var globales (0)*/
 	int i,j,declared=0;
-	while (node != NULL){
-		switch (node -> kind){
-			case Identifier:
-				for (i = 0; i < STNumber; i++){
-					for (j = 0;j < STSize[i]; j++){
-						if (!strcmp(symbolTable[i][j].name, node->u.identifier))
-						{
-							declared = 1;
-							break;
-						}
-					}
-				}
-				
-				if (!declared)
-					printf("\x1b[31mUtilisation de la variable %s sans l'avoir déclaré\x1b[0m \n", node->u.identifier);
+	for (i = 0; i < STNumber; i++){
+		for (j = 0;j < STSize[i]; j++){
+			if (!strcmp(symbolTable[i][j].name, name))
+			{
+				declared = 1;
 				break;
-			default:
-				break;
+			}
 		}
-		declared = 0;
-		if (node -> firstChild != NULL)
-			isInTable(node->firstChild);
-
-		node = node->nextSibling;
+		if (declared == 1)
+			break;
 	}
+	
+	if (!declared)
+		printf("\x1b[31mUtilisation de la variable %s sans l'avoir déclaré\x1b[0m \n", name);
+	
 }
 
 void printTable(){

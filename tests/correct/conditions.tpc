@@ -2,6 +2,16 @@ int r1, b, s, c, r2;
 char letter, digit, punct;
 int i;
 
+int add(int a, int b)
+{
+    return a + b;
+}
+
+void test(void)
+{
+    return;
+}
+
 int main(void)
 {
     int rr;
@@ -28,12 +38,3 @@ int main(void)
     return b;
 }
 
-int add(int a, int b)
-{
-    return a + b;
-}
-
-void test(void)
-{
-    return;
-}

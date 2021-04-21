@@ -10,4 +10,4 @@ typedef struct {
 void addVar(const char name[],int type);
 void printTable();
 void createTable(Node *node);
-void isInTable(Node *node);
+void isInTable(const char name[]);

@@ -40,7 +40,7 @@ static const char *StringFromKind[] = {
   "Parameter",
   "ReturnType",
   "Corps",
-  "EndFunc"
+  "End"
   
 	  /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */

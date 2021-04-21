@@ -59,7 +59,7 @@ Prog:  TypesVars DeclFoncts {
 			      		addChild($$,$2);
 				
 				printTree($$); 
-				createTable($$); printTable(); isInTable($$); 
+				createTable($$); printTable();
 			      }
     |  /* empty */ { $$ = NULL ;}
     ;
@@ -74,7 +74,8 @@ TypesVars:
 						       strcpy($$->u.identifier,$3);
 						       if ($1 != NULL)
 							  {addSibling($$,$1);}
-							addChild($$,$5); }
+							addChild($$,$5);
+							addSibling($$,makeNode(End));}
     |  /* empty */ { $$ = NULL ; }
     ;
 Type:
@@ -110,7 +111,7 @@ DeclFonct:
 			   addChild(n,$2);
 			   addSibling($1,n);
 			   addChild($$,$1);
-			   Node *end = makeNode(EndFunc);
+			   Node *end = makeNode(End);
 			   addSibling($$,end);}
     ;
 EnTeteFonct:
