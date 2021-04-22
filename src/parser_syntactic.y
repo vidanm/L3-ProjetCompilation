@@ -17,7 +17,6 @@
 
 int yylex();
 int yyerror(const char *);
-int current_type;
 extern int lineno;
 extern char yytext[];
 extern int charno;
@@ -26,21 +25,23 @@ extern char line[200];
 
 /* %define parse.error verbose */
 
-%union{
+%union value {
     int integer;
     char character;
     char identifier[64];
     Node *node;
-}
+};
 
 %token <character>CHARACTER
 %token <integer>NUM
 %token <identifier>IDENT
-%token <identifier>SIMPLETYPE
+%token <integer>SIMPLETYPE
+%token <integer>STRUCT
+%token <integer>VOID
 %token ORDER EQ
 %token ADDSUB
 %token DIVSTAR
-%token OR AND STRUCT IF WHILE RETURN VOID PRINT READC READE
+%token OR AND IF WHILE RETURN PRINT READC READE
 %left ')'
 %left ELSE
 %type <node> SuiteInstr Instr Exp TB FB M E T F LValue
@@ -49,150 +50,131 @@ extern char line[200];
 %type <node> Corps ListTypVar Parametres EnTeteFonct
 
 %%
-Prog:  TypesVars DeclFoncts {
-        $$ = makeNode(Program);
-        addChild($$, $1);
-        addChild($$, $2);
-    	printTree($$);
-        printTable();
-		}
+Prog:  TypesVars DeclFoncts { 
+			      $$ = makeNode(Program);
+    			      if ($1 != NULL) {
+    			         addSibling($1,$2);
+				 addChild($$,$1);
+			      } else 
+			      		addChild($$,$2);
+				
+				printTree($$); 
+				createTable($$); printTable();
+			      }
+    |  /* empty */ { $$ = NULL ;}
     ;
 
 TypesVars:
-        /* Declarations of global variable (simple and complex type)  */
-        TypesVars Type Declarateurs ';' {
-            Node *n = makeNode(GlobeVar);
-            addChild(n, $2);
-            addChild(n, $3);
-            if($1 == NULL){
-                $$ = n;
-            }else{
-                $$ = $1;
-                addSibling($$, n);
-            }
-        }
+       TypesVars Type Declarateurs ';' { $$ = $2;
+					 if ($1 != NULL)
+					 	addSibling($$,$1);
+					 addChild($$,$3); }
 
-        /* Definition of structure */
-    |   TypesVars STRUCT IDENT '{' DeclChamps '}' ';' {
-            Node *n = makeNode(DefStruct);
-            addChild(n, $5);
-            set_identifier(n, $3);
-			if($1 == NULL){
-                $$ = n;
-            }else{
-                $$ = $1;
-                addSibling($$, n);
-            }
-            }
-
+    |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';' { $$ = makeNode(DeclStruct);
+						       strcpy($$->u.identifier,$3);
+						       if ($1 != NULL)
+							  {addSibling($$,$1);}
+							addChild($$,$5);
+							addSibling($$,makeNode(End));}
     |  /* empty */ { $$ = NULL ; }
     ;
 
 Type:
-       SIMPLETYPE  {  $$ = makeNode(TypeSimp); set_identifier($$, $1); }
-    | STRUCT IDENT {  $$ = makeNode(TypeStruct); set_identifier($$, $2); }
+       SIMPLETYPE  {  $$ = makeNode(Type); $$->u.integer = $1;}
+    | STRUCT IDENT {  $$ = makeNode(Type); $$->u.integer = $1;}
     ;
 Declarateurs:
-       Declarateurs ',' IDENT { 
-                Node *id = makeNode(Identifier);
-                set_identifier(id, $3);
-				addSibling($1, id);
-                $$ = $1;
-				addVar($3,1);}
-    |  IDENT { $$ = makeNode(Identifier); set_identifier($$, $1); addVar($1,1); }
+       Declarateurs ',' IDENT { $$ = makeNode(VarDeclaration);
+				addSibling($$,$1);
+				strcpy($$->u.identifier,$3);
+				} 
+    |  IDENT { $$ = makeNode(VarDeclaration); strcpy($$->u.identifier,$1);}
     ;
 
 DeclChamps :
-       DeclChamps Type Declarateurs ';'
-                        {   Node *champ = makeNode(DeclChamp);
-                            addChild(champ, $2);
-                            addChild(champ, $3); 
-                            addChild($1, champ);
-                            $$ = $1;
-						}
-    
-    |  Type Declarateurs ';' { 
-            $$ = makeNode(DeclChamp);
-            addChild($$, $1);
-            addChild($$, $2);
-            }
+       DeclChamps SIMPLETYPE Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $2;
+						addChild($$,$3);
+						addSibling($$,$1); }
+    |  SIMPLETYPE Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $1; addChild($$,$2); }
+    |  DeclChamps STRUCT IDENT Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $2;
+						  addChild($$,$4);
+						  addSibling($$,$1); }
+    |  STRUCT IDENT Declarateurs ';' {$$ = makeNode(Type); $$->u.integer = $1; addChild($$,$3); }
     ;
 DeclFoncts:
-       DeclFoncts DeclFonct { $$ = $2;
-			      addSibling($$,$1); }
+       DeclFoncts DeclFonct { $$ = $1;
+			      addSibling($$,$2); }
     |  DeclFonct { $$ = $1; }
     ;
 DeclFonct:
-       EnTeteFonct Corps {
-                $$ = makeNode(DefFunct);
-                addChild($$, $1);
-                addChild($$, $2);
-                }
+       EnTeteFonct Corps { $$ = makeNode(Func);
+			   Node *n = makeNode(Corps);
+			   addChild(n,$2);
+			   addSibling($1,n);
+			   addChild($$,$1);
+			   Node *end = makeNode(End);
+			   addSibling($$,end);}
     ;
 EnTeteFonct:
-       Type IDENT '(' Parametres ')' {
-                    $$ = makeNode(DefFunctHead);
-                    addChild($$, $1);
-                    set_identifier($$, $2);
-				    addChild($$, $4);
-                    }
-    |  VOID IDENT '(' Parametres ')' {
-                    $$ = makeNode(DefFunctHead);
-                    addChild($$, makeNode(Void));
-                    set_identifier($$, $2);
-				    addChild($$, $4);
-                    }
+       Type IDENT '(' Parametres ')' { $$ = makeNode(VarDeclaration);
+				       strcpy($$->u.identifier,$2);
+				       Node *n = makeNode(ReturnType);
+				       n->u.integer = $1->u.integer;
+				       addSibling($$,n);
+				       if ($4 != NULL)
+				       	addSibling($$,$4);}
+    |  VOID IDENT '(' Parametres ')' { $$ = makeNode(VarDeclaration);
+				       strcpy($$->u.identifier,$2);
+				       Node *n = makeNode(ReturnType);
+				       n->u.integer = $1;
+				       addSibling($$,n);
+				       if ($4 != NULL)
+				       addSibling($$,$4); }
     ;
 Parametres:
-       VOID { $$ = makeNode(Void); }
-    |  ListTypVar { $$ = $1; }
-    |  /* empty */ {$$ = makeNode(Void);}
+       VOID { $$ = makeNode(Parameter); }
+    |  ListTypVar { $$ = makeNode(Parameter); addChild($$,$1); }
+    |  /* empty */ {$$ = makeNode(Parameter);}
     ;
 ListTypVar:
-       ListTypVar ',' Type IDENT {
-            Node *paraTypVar = makeNode(ParaTypVar);
-            addChild(paraTypVar, $3);
-            set_identifier(paraTypVar, $4);
-			addSibling($1,paraTypVar);
-            $$ = $1;
-            }
-    |  Type IDENT {
-            $$ = makeNode(ParaTypVar);
-            addChild($$, $1);
-            set_identifier($$, $2);
-        }
+       ListTypVar ',' Type IDENT { $$ = $3;
+				   Node *n = makeNode(VarDeclaration);
+				   strcpy(n->u.identifier,$4);
+				   addChild($$,n);
+				   addSibling($$,$1); }
+    |  Type IDENT { $$ = $1;
+		   Node *n = makeNode(VarDeclaration);
+		   strcpy(n->u.identifier,$2); 
+		   addChild($$,n);}
     ;
-Corps: '{' DeclVars SuiteInstr '}'      {   
-                $$ = makeNode(DefFunctCorps);
-                addChild($$, $2);
-                addChild($$, $3);
-			    }
+Corps: '{' DeclVars SuiteInstr '}' { if ($2 != NULL){ 
+     				     	$$ = $2;
+                                     	if ($3 != NULL){
+						addSibling($$,$3); 
+				     	}
+				     } else if ($3 != NULL){
+					$$ = $3;
+					} else { $$ = NULL; }
+				     }
     ;
 DeclVars:
-       DeclVars Type Declarateurs ';' {
-           Node *n = makeNode(DeclVar);
-           addChild(n, $2);
-           addChild(n, $3);
-           $$ = $3;
-           if ($1 == NULL){
-               $$ = n;
-           }else{
-               $$ = $1;
-               addChild($$, n);
-           }
-		}
+       DeclVars Type Declarateurs ';' { $$ = $2;
+				        addChild($$,$3);
+					if ($1 != NULL)
+						addSibling($$,$1);
+					}
     |  /* empty */ { $$ = NULL; }
     ;
 SuiteInstr:
-       SuiteInstr Instr { 
-            if ($1 != NULL){
-                addSibling($1, $2);
-                $$ = $1;
-            }else{
-                $$ = $2;
-            }
-			
-            }
+       SuiteInstr Instr {
+			if ($1 != NULL){
+				$$ = $1;
+				addSibling($$,$2);
+			}
+			else {
+				$$ = $2;
+			}
+			}
     |  /* empty */ { $$ = NULL; }
     ;
 Instr:
@@ -244,7 +226,9 @@ FB  :  FB EQ M      {
     	addChild($$,$1);
 		addSibling($1,$3);
 	}
-    |  M        { $$ = $1; }
+    |  M
+
+{ $$ = $1; }
     ;
 
 M   :  M ORDER E    {   
@@ -279,7 +263,8 @@ F  :  ADDSUB F      {$$ = makeNode(UnaryAddSub);
     |  '!' F        {$$ = makeNode(Negation);
                     addChild($$, $2); }
 
-    |  '&' IDENT    { /* pointer */}
+    |  '&' IDENT    { $$ = makeNode(Identifier);
+		      strcpy($$->u.identifier,$2); /* pointer */}
 
     |  '(' Exp ')'  { $$ = $2; }
 
@@ -306,6 +291,11 @@ LValue:
         }
 
     |  IDENT '.' IDENT  {
+	$$ = makeNode(Identifier);
+	strcpy($$->u.identifier,$1);
+	Node *n = makeNode(StructIdentifier);
+	strcpy(n->u.identifier,$3);
+	addChild($$,n);
         /*$$ = makeNode(StructIdentifier);
         Node left = makeNode(Identifier);
         EVAL_STR(left, $1);
@@ -329,8 +319,12 @@ int yyerror(const char *s) {
 	printf("%s ", s);
 	printf("%d - char %d:\n", lineno, charno);
 	printf("%s\n",line);
-	for (j=0;j<charno;j++)
-		printf(" ");
+	for (j=0;j<charno;j++){
+		if (line[j] == '\t')
+			printf("\t");
+		else
+			printf(" ");
+	}
 	printf("^\n");
 	return 1;
 }

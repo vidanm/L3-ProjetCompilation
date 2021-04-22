@@ -1,0 +1,40 @@
+int r1, b, s, c, r2;
+char letter, digit, punct;
+int i;
+
+int add(int a, int b)
+{
+    return a + b;
+}
+
+void test(void)
+{
+    return;
+}
+
+int main(void)
+{
+    int rr;
+
+    r1 = 12;
+    r2 = 24;
+    b = r1 + r2;
+    c = add(12, r1);
+    punct = '.';
+
+    readc(c);
+
+    if (r1 < r2 && r1 != a) {
+        b = r2;
+        if (b - r1 == 0) {
+            punct = '!';
+        }
+    } else {
+        return r1;
+    }
+
+    print(3);
+
+    return b;
+}
+

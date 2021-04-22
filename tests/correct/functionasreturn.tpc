@@ -1,3 +1,9 @@
-int main(void){
+int calc(int x){
+	return 1;
+}
+
+int main(int argc,char argv){
+	int x,y;
+	x = x + y;
 	return calc(x);
 }
