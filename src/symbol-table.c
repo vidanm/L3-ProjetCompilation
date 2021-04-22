@@ -4,7 +4,8 @@
 #include "abstract-tree.h"
 #include "symbol-table.h"
 
-static const char *StringFromType[] = {
+
+char *StringFromType[] = {
 	"void",
 	"int",
 	"char",
@@ -83,7 +84,6 @@ void createTable(Node *node){
 
 void isInTable(const char name[])
 {
-	/* Ne vérifie que la présence des variables dans la table de symboles de var globales (0)*/
 	int i,j,declared=0;
 	for (i = 0; i < STNumber; i++){
 		for (j = 0;j < STSize[i]; j++){

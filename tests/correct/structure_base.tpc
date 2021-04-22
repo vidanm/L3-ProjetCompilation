@@ -2,4 +2,6 @@ struct hello { int x; int y; };
 
 int main(void){
 	struct hello a;
+	a.x = 5;
+	return a.y;
 }

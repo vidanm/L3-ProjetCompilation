@@ -165,9 +165,15 @@ DeclVars:
     |  /* empty */ { $$ = NULL; }
     ;
 SuiteInstr:
-       SuiteInstr Instr { $$=$2;
-			if ($1 != NULL)  
-			addSibling($$,$1);}
+       SuiteInstr Instr {
+			if ($1 != NULL){
+				$$ = $1;
+				addSibling($$,$2);
+			}
+			else {
+				$$ = $2;
+			}
+			}
     |  /* empty */ { $$ = NULL; }
     ;
 Instr:
@@ -282,6 +288,11 @@ LValue:
         }
 
     |  IDENT '.' IDENT  {
+	$$ = makeNode(Identifier);
+	strcpy($$->u.identifier,$1);
+	Node *n = makeNode(StructIdentifier);
+	strcpy(n->u.identifier,$3);
+	addChild($$,n);
         /*$$ = makeNode(StructIdentifier);
         Node left = makeNode(Identifier);
         EVAL_STR(left, $1);

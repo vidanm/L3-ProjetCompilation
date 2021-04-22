@@ -40,7 +40,8 @@ static const char *StringFromKind[] = {
   "Parameter",
   "ReturnType",
   "Corps",
-  "End"
+  "End",
+  "StructIdentifier"
   
 	  /* and all other node labels */
   /* The list must coincide with the enum in abstract-tree.h */
@@ -110,6 +111,8 @@ void printTree(Node *node) {
     case IntLiteral: printf(": %d", node->u.integer); break;
     case CharLiteral: printf(": '%c'", node->u.character); break;
     case Identifier: printf(": %s", node->u.identifier); break;
+    case DeclStruct: printf(": %s",node->u.identifier); break;
+    case StructIdentifier: printf(": %s",node->u.identifier); break;
     default: break;
   }
   printf("\n");
