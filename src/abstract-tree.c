@@ -111,11 +111,11 @@ void printTree(Node *node) {
   }
   printf("%s", StringFromKind[node->kind]);
   switch (node->kind) {
-    case Type: printf(": %s",StringFromType[node->u.integer]);break;
     case IntLiteral: printf(": %d", node->u.integer); break;
     case CharLiteral: printf(": '%c'", node->u.character); break;
     case Identifier: printf(": %s", node->u.identifier); break;
     case TypeSimp: printf(": %s", node->u.identifier); break;
+    case TypeStruct: printf(": %s", node->u.identifier); break;
     case DefFunctHead: printf(": %s", node->u.identifier); break;
     case Call: printf(": %s", node->u.identifier); break;
     case ParaTypVar: printf(": %s", node->u.identifier); break;
