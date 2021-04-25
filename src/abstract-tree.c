@@ -123,7 +123,7 @@ void printTree(Node *node) {
     case DivStar: printf(": %c", node->u.character); break;
     case Order: printf(": %s", node->u.identifier); break;
     case Eq: printf(": %s", node->u.identifier); break;
-
+    case DefStruct: printf(": %s", node->u.identifier); break;
     default: break;
   }
   printf("\n");

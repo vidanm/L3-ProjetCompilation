@@ -102,11 +102,11 @@ Declarateurs:
     ;
 
 DeclChamps :
-       DeclChamps Type Declarateurs ';'
-                        {   Node *champ = makeNode(DeclChamp);
+       DeclChamps Type Declarateurs ';' {   
+                            Node *champ = makeNode(DeclChamp);
                             addChild(champ, $2);
                             addChild(champ, $3); 
-                            addChild($1, champ);
+                            addSibling($1, champ);
                             $$ = $1;
 						}
     
