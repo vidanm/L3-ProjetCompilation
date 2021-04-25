@@ -9,7 +9,6 @@ extern int lineno;       /* from lexer */
 static const char *StringFromKind[] = {
   "Program",
   "VarDeclList",
-  /* declaration */
   "GlobeVar",
   "TypeSimp",
   "TypeStruct",
@@ -20,7 +19,6 @@ static const char *StringFromKind[] = {
   "DefFunctHead",
   "DefFunctCorps",
   "ParaTypVar",
-  /* instructions */
   "Move",
   "InstrIF",
   "InstrIFELSE",
@@ -32,7 +30,6 @@ static const char *StringFromKind[] = {
   "ReturnVoid",
   "ReturnValue",
   "Print",
-  /* expression */
   "Identifier",
   "IntLiteral",
   "CharLiteral",
@@ -47,21 +44,8 @@ static const char *StringFromKind[] = {
   "Struct",
   "Type",
   "Void",
-<<<<<<< HEAD
   "Call"
-  /* and all other node labels */
-=======
-  "Func",
-  "VarDeclaration",
-  "DeclStruct",
-  "Parameter",
-  "ReturnType",
-  "Corps",
-  "End",
-  "StructIdentifier"
-  
 	  /* and all other node labels */
->>>>>>> 6fb22cea9ec82d805f98b5db4113475c849ec33f
   /* The list must coincide with the enum in abstract-tree.h */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
 };
@@ -127,20 +111,19 @@ void printTree(Node *node) {
   }
   printf("%s", StringFromKind[node->kind]);
   switch (node->kind) {
-    case VarDeclaration: printf(": %s",node->u.identifier);break;
     case Type: printf(": %s",StringFromType[node->u.integer]);break;
-    case ReturnType: printf(": %s",StringFromType[node->u.integer]);break;
     case IntLiteral: printf(": %d", node->u.integer); break;
     case CharLiteral: printf(": '%c'", node->u.character); break;
     case Identifier: printf(": %s", node->u.identifier); break;
-<<<<<<< HEAD
     case TypeSimp: printf(": %s", node->u.identifier); break;
     case DefFunctHead: printf(": %s", node->u.identifier); break;
     case Call: printf(": %s", node->u.identifier); break;
-=======
-    case DeclStruct: printf(": %s",node->u.identifier); break;
-    case StructIdentifier: printf(": %s",node->u.identifier); break;
->>>>>>> 6fb22cea9ec82d805f98b5db4113475c849ec33f
+    case ParaTypVar: printf(": %s", node->u.identifier); break;
+    case AddSub: printf(": %c", node->u.character); break;
+    case DivStar: printf(": %c", node->u.character); break;
+    case Order: printf(": %s", node->u.identifier); break;
+    case Eq: printf(": %s", node->u.identifier); break;
+
     default: break;
   }
   printf("\n");

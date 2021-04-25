@@ -40,43 +40,24 @@ unsigned int charno=0;
 "//"	    	{ charno += yyleng;BEGIN SHORT_COMMENT; }
 &&		    	{ charno += yyleng;return AND; }
 "||"			{ charno += yyleng;return OR; }
-"+"|-			{ charno += yyleng; return ADDSUB; }
-"*"|"/"|"%"	        { charno += yyleng;return DIVSTAR; }
-"<"|"<="|">"|>=		{ charno += yyleng;return ORDER; }
-==|!=			{ charno += yyleng;return EQ; }
-<<<<<<< HEAD:src/parser_lexical.flex
+"+"|"-"			{ charno += yyleng; yylval.character = yytext[0]; return ADDSUB; }
+"*"|"/"|"%"	        { charno += yyleng; yylval.character = yytext[0]; return DIVSTAR; }
+"<"|"<="|">"|>=		{ charno += yyleng; COPY_STRING; return ORDER; }
+==|!=			{ charno += yyleng; COPY_STRING; return EQ; }
 int			    { charno += yyleng; COPY_STRING; return SIMPLETYPE;}
 char		    { charno += yyleng; COPY_STRING; return SIMPLETYPE;}
-=======
-int			    { charno += yyleng;
-			      yylval.integer = 1;	      
-			      return SIMPLETYPE;
-			      }
-char		    { charno += yyleng;
-			yylval.integer = 2;
-			return SIMPLETYPE;}
->>>>>>> 6fb22cea9ec82d805f98b5db4113475c849ec33f:src/lexical_parser.flex
 print			{ charno += yyleng;return PRINT; }
 readc			{ charno += yyleng;return READC; }
 reade			{ charno += yyleng;return READE; }
-void			{ charno += yyleng;yylval.integer = 0;return VOID; }
-struct		    { charno += yyleng;yylval.integer = 3; return STRUCT;}
+void			{ charno += yyleng;return VOID; }
+struct		    { charno += yyleng;return STRUCT; }
 if			    { charno += yyleng;return IF; }
 else			{ charno += yyleng;return ELSE; }
 while			{ charno += yyleng;return WHILE; }
 return		    { charno += yyleng;return RETURN; }
-<<<<<<< HEAD:src/parser_lexical.flex
 [a-zA-Z_][a-zA-Z0-9_]*  { charno += yyleng; COPY_STRING; return IDENT; }
 [0-9]+			        { charno += yyleng; yylval.integer = atoi(yytext); return NUM;}
-=======
-[a-zA-Z_][a-zA-Z0-9_]*  { charno += yyleng; 
-			   strcpy(yylval.identifier,yytext); 
-			   return IDENT; }
-[0-9]+			        { charno += yyleng; 
-				  yylval.integer = atoi(yytext);
-				  return NUM;}
->>>>>>> 6fb22cea9ec82d805f98b5db4113475c849ec33f:src/lexical_parser.flex
-'\\?.'			        { charno += yyleng; yylval.character = yytext[0]; return CHARACTER; }
+'\\?.'			        { charno += yyleng; yylval.character = yytext[1]; return CHARACTER; }
 <<EOF>> 				return 0;
 .			            { charno += yyleng; return yytext[0];}
 

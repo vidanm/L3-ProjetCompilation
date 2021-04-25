@@ -1,5 +1,9 @@
 /* abstract-tree.h */
 
+// include guard
+#ifndef AST_H
+#define AST_H
+
 typedef enum {
   Program,
   VarDeclList,
@@ -41,20 +45,8 @@ typedef enum {
   Struct,
   Type,
   Void,
-<<<<<<< HEAD
   Call
-  /* and all other node labels */
-=======
-  Func,
-  VarDeclaration,
-  DeclStruct,
-  Parameter,
-  ReturnType,
-  Corps,
-  End,
-  StructIdentifier
   /* and allother node labels */
->>>>>>> 6fb22cea9ec82d805f98b5db4113475c849ec33f
   /* The list must coincide with the strings in abstract-tree.c */
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
 } Kind;
@@ -115,3 +107,5 @@ void printTree(Node *node);
  * Macro to access the third child.
  */
 #define THIRDCHILD(node) node->firstChild->nextSibling->nextSibling
+
+#endif

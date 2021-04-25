@@ -13,14 +13,14 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-#define EVAL_STR(node, str) strcpy(node->u.identifier, str)
-
 int yylex();
 int yyerror(const char *);
 extern int lineno;
 extern char yytext[];
 extern int charno;
 extern char line[200];
+
+Node *AST = NULL;
 %}
 
 /* %define parse.error verbose */
@@ -32,15 +32,12 @@ extern char line[200];
     Node *node;
 };
 
-%token <character>CHARACTER
+%token <character>CHARACTER ADDSUB DIVSTAR
 %token <integer>NUM
 %token <identifier>IDENT
-%token <integer>SIMPLETYPE
+%token <identifier>SIMPLETYPE ORDER EQ
 %token <integer>STRUCT
 %token <integer>VOID
-%token ORDER EQ
-%token ADDSUB
-%token DIVSTAR
 %token OR AND IF WHILE RETURN PRINT READC READE
 %left ')'
 %left ELSE
@@ -51,160 +48,184 @@ extern char line[200];
 
 %%
 Prog:  TypesVars DeclFoncts { 
-			      $$ = makeNode(Program);
-    			      if ($1 != NULL) {
-    			         addSibling($1,$2);
-				 addChild($$,$1);
-			      } else 
+			        $$ = makeNode(Program);
+    			    if ($1 != NULL) {
+    			        addSibling($1,$2);
+				        addChild($$,$1);
+			        } else{
 			      		addChild($$,$2);
-				
-				printTree($$); 
-				createTable($$); printTable();
+                    }
+                    AST = $$;
 			      }
-    |  /* empty */ { $$ = NULL ;}
     ;
 
 TypesVars:
-       TypesVars Type Declarateurs ';' { $$ = $2;
-					 if ($1 != NULL)
-					 	addSibling($$,$1);
-					 addChild($$,$3); }
-
-    |  TypesVars STRUCT IDENT '{' DeclChamps '}' ';' { $$ = makeNode(DeclStruct);
-						       strcpy($$->u.identifier,$3);
-						       if ($1 != NULL)
-							  {addSibling($$,$1);}
-							addChild($$,$5);
-							addSibling($$,makeNode(End));}
+        /* Declarations of global variable (simple and complex type)  */
+        TypesVars Type Declarateurs ';' { 
+            Node *n = makeNode(GlobeVar);
+            addChild(n, $2);
+            addChild(n, $3);
+            if($1 == NULL){
+                $$ = n;
+            }else{
+                $$ = $1;
+                addSibling($$, n);
+            } 
+        }
+        /* Definitions of structure */
+    |   TypesVars STRUCT IDENT '{' DeclChamps '}' ';' {
+            Node *n = makeNode(DefStruct);
+            addChild(n, $5);
+            set_identifier(n, $3);
+			if($1 == NULL){
+                $$ = n;
+            }else{
+                $$ = $1;
+                addSibling($$, n);
+            }
+        }
     |  /* empty */ { $$ = NULL ; }
     ;
 
 Type:
-       SIMPLETYPE  {  $$ = makeNode(Type); $$->u.integer = $1;}
-    | STRUCT IDENT {  $$ = makeNode(Type); $$->u.integer = $1;}
+       SIMPLETYPE  {  $$ = makeNode(TypeSimp); set_identifier($$, $1); }
+    | STRUCT IDENT {  $$ = makeNode(TypeStruct); set_identifier($$, $2); }
     ;
 Declarateurs:
-       Declarateurs ',' IDENT { $$ = makeNode(VarDeclaration);
-				addSibling($$,$1);
-				strcpy($$->u.identifier,$3);
-				} 
-    |  IDENT { $$ = makeNode(VarDeclaration); strcpy($$->u.identifier,$1);}
+       Declarateurs ',' IDENT { 
+                Node *id = makeNode(Identifier);
+                set_identifier(id, $3);
+				addSibling($1, id);
+                $$ = $1;
+			}
+    |  IDENT { $$ = makeNode(Identifier); set_identifier($$, $1);}
     ;
 
 DeclChamps :
-       DeclChamps SIMPLETYPE Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $2;
-						addChild($$,$3);
-						addSibling($$,$1); }
-    |  SIMPLETYPE Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $1; addChild($$,$2); }
-    |  DeclChamps STRUCT IDENT Declarateurs ';' { $$ = makeNode(Type); $$->u.integer = $2;
-						  addChild($$,$4);
-						  addSibling($$,$1); }
-    |  STRUCT IDENT Declarateurs ';' {$$ = makeNode(Type); $$->u.integer = $1; addChild($$,$3); }
+       DeclChamps Type Declarateurs ';'
+                        {   Node *champ = makeNode(DeclChamp);
+                            addChild(champ, $2);
+                            addChild(champ, $3); 
+                            addChild($1, champ);
+                            $$ = $1;
+						}
+    
+    |  Type Declarateurs ';' { 
+            $$ = makeNode(DeclChamp);
+            addChild($$, $1);
+            addChild($$, $2);
+            }
     ;
 DeclFoncts:
-       DeclFoncts DeclFonct { $$ = $1;
-			      addSibling($$,$2); }
+       DeclFoncts DeclFonct {
+            $$ = $1;
+			addSibling($$,$2);
+        }
     |  DeclFonct { $$ = $1; }
     ;
 DeclFonct:
-       EnTeteFonct Corps { $$ = makeNode(Func);
-			   Node *n = makeNode(Corps);
-			   addChild(n,$2);
-			   addSibling($1,n);
-			   addChild($$,$1);
-			   Node *end = makeNode(End);
-			   addSibling($$,end);}
+       EnTeteFonct Corps {
+            $$ = makeNode(DefFunct);
+            addChild($$, $1);
+            addChild($$, $2);
+        }
     ;
 EnTeteFonct:
-       Type IDENT '(' Parametres ')' { $$ = makeNode(VarDeclaration);
-				       strcpy($$->u.identifier,$2);
-				       Node *n = makeNode(ReturnType);
-				       n->u.integer = $1->u.integer;
-				       addSibling($$,n);
-				       if ($4 != NULL)
-				       	addSibling($$,$4);}
-    |  VOID IDENT '(' Parametres ')' { $$ = makeNode(VarDeclaration);
-				       strcpy($$->u.identifier,$2);
-				       Node *n = makeNode(ReturnType);
-				       n->u.integer = $1;
-				       addSibling($$,n);
-				       if ($4 != NULL)
-				       addSibling($$,$4); }
+       Type IDENT '(' Parametres ')' {
+                    $$ = makeNode(DefFunctHead);
+                    addChild($$, $1);
+                    set_identifier($$, $2);
+				    addChild($$, $4);
+                }
+    |  VOID IDENT '(' Parametres ')' {
+                    $$ = makeNode(DefFunctHead);
+                    addChild($$, makeNode(Void));
+                    set_identifier($$, $2);
+				    addChild($$, $4);
+                }
     ;
 Parametres:
-       VOID { $$ = makeNode(Parameter); }
-    |  ListTypVar { $$ = makeNode(Parameter); addChild($$,$1); }
-    |  /* empty */ {$$ = makeNode(Parameter);}
+       VOID         { $$ = makeNode(Void); }
+    |  ListTypVar   { $$ = $1; }
+    |  /* empty */  {$$ = makeNode(Void);}
     ;
+/* save type and name as local variable */
 ListTypVar:
-       ListTypVar ',' Type IDENT { $$ = $3;
-				   Node *n = makeNode(VarDeclaration);
-				   strcpy(n->u.identifier,$4);
-				   addChild($$,n);
-				   addSibling($$,$1); }
-    |  Type IDENT { $$ = $1;
-		   Node *n = makeNode(VarDeclaration);
-		   strcpy(n->u.identifier,$2); 
-		   addChild($$,n);}
+       ListTypVar ',' Type IDENT {
+            Node *paraTypVar = makeNode(ParaTypVar);
+            addChild(paraTypVar, $3);
+            set_identifier(paraTypVar, $4);
+			addSibling($1,paraTypVar);
+            $$ = $1;
+            }
+    |  Type IDENT {
+            $$ = makeNode(ParaTypVar);
+            addChild($$, $1);
+            set_identifier($$, $2);
+        }
     ;
-Corps: '{' DeclVars SuiteInstr '}' { if ($2 != NULL){ 
-     				     	$$ = $2;
-                                     	if ($3 != NULL){
-						addSibling($$,$3); 
-				     	}
-				     } else if ($3 != NULL){
-					$$ = $3;
-					} else { $$ = NULL; }
-				     }
+Corps: '{' DeclVars SuiteInstr '}'      {   
+                $$ = makeNode(DefFunctCorps);
+                addChild($$, $2);
+                addChild($$, $3);
+			}
     ;
 DeclVars:
-       DeclVars Type Declarateurs ';' { $$ = $2;
-				        addChild($$,$3);
-					if ($1 != NULL)
-						addSibling($$,$1);
-					}
+        DeclVars Type Declarateurs ';' {
+            Node *n = makeNode(DeclVar);
+            addChild(n, $2);
+            addChild(n, $3);
+            if ($1 == NULL){
+                $$ = n;
+            }else{
+                $$ = $1;
+                addSibling($$, n);
+            }
+		}
     |  /* empty */ { $$ = NULL; }
     ;
+/* May be NULL */
 SuiteInstr:
-       SuiteInstr Instr {
-			if ($1 != NULL){
-				$$ = $1;
-				addSibling($$,$2);
-			}
-			else {
-				$$ = $2;
-			}
-			}
-    |  /* empty */ { $$ = NULL; }
+        SuiteInstr Instr { 
+            if ($1 != NULL){
+                addSibling($1, $2);
+                $$ = $1;
+            }else{
+                $$ = $2;
+            }
+        }
+    |   /* empty */ { $$ = NULL; }
     ;
+/* May be NULL */
 Instr:
-       LValue '=' Exp ';'       {$$ = makeNode(Move); addChild($$, $1); addSibling($1, $3);}
-    |  READE '(' LValue ')' ';' {$$ = makeNode(InstrReadE); addChild($$, $3);}
-    |  READC '(' LValue ')' ';' {$$ = makeNode(InstrReadC); addChild($$, $3);}
-    |  PRINT '(' Exp ')' ';'    {$$ = makeNode(Print); addChild($$, $3);}
-    |  IF '(' Exp ')' Instr {   $$ = makeNode(InstrIF);
-                                        addChild($$, $3);
-                                        addSibling($3, $5);
-                            }
-    |  IF '(' Exp ')' Instr ELSE Instr  {
+        LValue '=' Exp ';'       {$$ = makeNode(Move); addChild($$, $1); addSibling($1, $3);}
+    |   READE '(' LValue ')' ';' {$$ = makeNode(InstrReadE); addChild($$, $3);}
+    |   READC '(' LValue ')' ';' {$$ = makeNode(InstrReadC); addChild($$, $3);}
+    |   PRINT '(' Exp ')' ';'    {$$ = makeNode(Print); addChild($$, $3);}
+    |   IF '(' Exp ')' Instr     {
+            $$ = makeNode(InstrIF);
+            addChild($$, $3);
+            addSibling($3, $5);
+        }
+    |   IF '(' Exp ')' Instr ELSE Instr  {
             $$ = makeNode(InstrIFELSE);
             addChild($$, $3);
             addSibling($3, $5);
             addSibling($5, $7);
         }
-    |  WHILE '(' Exp ')' Instr  {
-        $$ = makeNode(InstrWhile);
-        addChild($$, $3);
-        addSibling($3, $5);
+    |   WHILE '(' Exp ')' Instr  {
+            $$ = makeNode(InstrWhile);
+            addChild($$, $3);
+            addSibling($3, $5);
         }
-    |  Exp ';'          {$$ = $1; }
-    |  RETURN Exp ';'       {
+    |   Exp ';'             { $$ = $1; }
+    |   RETURN Exp ';'      {
             $$ = makeNode(ReturnValue);
             addChild($$, $2);
         }
-    |  RETURN ';'           {$$ = makeNode(ReturnVoid);}
-    |  '{' SuiteInstr '}'   {$$ = $2;}
-    |  ';'                  {$$ = NULL;}
+    |   RETURN ';'           {$$ = makeNode(ReturnVoid);}
+    |   '{' SuiteInstr '}'   {$$ = $2;}
+    |   ';'                  {$$ = NULL;}
     ;
 Exp :  Exp OR TB    {   
         $$=makeNode(Or);
@@ -223,6 +244,7 @@ TB  :  TB AND FB    {
     ;
 FB  :  FB EQ M      {   
         $$=makeNode(Eq);
+        set_identifier($$, $2);
     	addChild($$,$1);
 		addSibling($1,$3);
 	}
@@ -233,6 +255,7 @@ FB  :  FB EQ M      {
 
 M   :  M ORDER E    {   
         $$=makeNode(Order);
+        set_identifier($$, $2);
     	addChild($$,$1);
 		addSibling($1,$3);
 	}
@@ -242,6 +265,7 @@ M   :  M ORDER E    {
 
 E   :  E ADDSUB T   {  
         $$=makeNode(AddSub);
+        $$->u.character = $2;
     	addChild($$,$1);
 		addSibling($1,$3);
 	}
@@ -250,6 +274,7 @@ E   :  E ADDSUB T   {
 
 T   :  T DIVSTAR F  {
         $$=makeNode(DivStar);
+        $$->u.character = $2;
     	addChild($$,$1);
 		addSibling($1,$3);
 		}
@@ -282,34 +307,31 @@ F  :  ADDSUB F      {$$ = makeNode(UnaryAddSub);
     |  IDENT '(' Arguments  ')' {
                 $$ = makeNode(Call);
                 set_identifier($$, $1);
+                addChild($$, $3);
         }
     ;
 LValue:
-       IDENT            {
-           $$ = makeNode(Identifier);
-           set_identifier($$, $1);
+        IDENT            {
+            $$ = makeNode(Identifier);
+            set_identifier($$, $1);
         }
 
-    |  IDENT '.' IDENT  {
-	$$ = makeNode(Identifier);
-	strcpy($$->u.identifier,$1);
-	Node *n = makeNode(StructIdentifier);
-	strcpy(n->u.identifier,$3);
-	addChild($$,n);
-        /*$$ = makeNode(StructIdentifier);
-        Node left = makeNode(Identifier);
-        EVAL_STR(left, $1);
-        Node right = makeNode(Identifier);
-        EVAL_STR(right, $3);*/
+    |   IDENT '.' IDENT  {;
+            $$ = makeNode(Identifier);
+            set_identifier($$, $1);
+            Node *member = makeNode(Identifier);
+            set_identifier(member, $3);
+            addChild($$, member);
         }
     ;
+/* NULL possible */
 Arguments:
        ListExp { $$ = $1; }
     |  /* empty */ { $$ = NULL; }
     ;
 ListExp:
-       ListExp ',' Exp {$$ = $3; addSibling($$,$1);}
-    |  Exp {$$ = $1;}
+       ListExp ',' Exp  { $$ = $1; addSibling($$,$3); }
+    |  Exp              { $$ = $1; }
     ;
 
 %%
@@ -333,5 +355,9 @@ int main(void){
 	if (yyparse() == 1){
 		return 1;
 	}
+    printTree(AST);
+    // printTable();
+	//createTable(AST);
+
 	return 0;
 }	
