@@ -8,7 +8,7 @@ SYNTACTIC = src/parser_syntactic
 
 TEST_SCRIPT = tests.sh
 
-all : $(EXEC) clean
+all : $(EXEC)
 
 $(EXEC): $(LEXICAL).c $(SYNTACTIC).c src/abstract-tree.c src/symbol-table.c
 	$(CC) $^ -o $(EXEC) $(CFLAGS) $(LDFLAGS)

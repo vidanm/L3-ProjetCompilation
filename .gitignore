@@ -5,6 +5,6 @@ as
 test_results
 
 # middle files
-*_parser.c
-*_parser.h
+parser_*.c
+parser_*.h
 
