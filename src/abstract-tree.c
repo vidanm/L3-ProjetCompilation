@@ -50,13 +50,6 @@ static const char *StringFromKind[] = {
   /* To avoid listing them twice, see https://stackoverflow.com/a/10966395 */
 };
 
-static const char *StringFromType[] = {
-	"void",
-	"int",
-	"char",
-	"struct"
-};
-
 Node *makeNode(Kind kind) {
   Node *node = malloc(sizeof(Node));
   if (!node) {

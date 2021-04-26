@@ -356,6 +356,8 @@ int main(void){
 		return 1;
 	}
     printTree(AST);
+    SymbolTable *table = makeTableFromAST(AST);
+    printSymbolTable(table);
     // printTable();
 	//createTable(AST);
 

@@ -3,7 +3,7 @@
 #define ST_H
 
 /* max nombre of symbols in a table of a scope */
-#define MAX_SYMBOLS 256
+#define MAX_SYMBOL_NUM 256
 /* max name length of a identifier */
 #define MAX_NAME_LENGTH 64
 /* max nomber of table */
@@ -19,30 +19,55 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define STR_EQUAL(s1, s2) (strcpy(s1,s2) == 0)
-
-/* entry in table */
-typedef struct {
-	char name[MAX_NAME_LENGTH];
+/* symbol in table */
+typedef struct symbol {
+	char identifier[MAX_NAME_LENGTH];
 	int type;
-} STentry;
+} Symbol;
 
-/**
- * Symbole table is global variable, which is list of pointer
- * that indicates to sub-tables in each scope.
- */
-STentry *symbolTable[MAX_TABLES];
+/* limit temporary: Each scope has up to 256 symbols */
+typedef struct scope {
+	Symbol *symbols[MAX_SYMBOL_NUM];
+	int size; 		// AKA next index to insert
+	struct scope *father;
+} Scope;
 
-/* add an entry in the table of current scope */
-void addVar(const char name[],int type);
+typedef struct symbol_table{
+	Scope *current;
+} SymbolTable;
 
-/* print table */
-void printTable();
+void pushScope(SymbolTable *table);
 
-/* create a symbole table from a AST */
-void createTable(Node *node);
+void popScope(SymbolTable *table);
 
-/* check if the name is already defined in the symbole table */
-void isInTable(const char name[]);
+void insertSymbol(SymbolTable *table, char identifier[], int type);
+
+int lookupSymbol(SymbolTable *table, char identifier[]);
+
+void printSymbolTable(SymbolTable *table);
+
+SymbolTable *makeTableFromAST(Node *tree);
+
+#define STR_EQUAL(s1, s2) (strcmp(s1,s2) == 0)
+
+
+
+// /**
+//  * Symbole table is global variable, which is list of pointer
+//  * that indicates to sub-tables in each scope.
+//  */
+// STentry *symbolTable[MAX_TABLES];
+
+// /* add an entry in the table of current scope */
+// void addVar(const char name[],int type);
+
+// /* print table */
+// void printTable();
+
+// /* create a symbole table from a AST */
+// void createTable(Node *node);
+
+// /* check if the name is already defined in the symbole table */
+// void isInTable(const char name[]);
 
 #endif
