@@ -1,26 +1,27 @@
 CC=gcc
 CFLAGS=-Wall -g
-LDFLAGS=-Wall -lfl -ly
-EXEC=as
+LDFLAGS=-Wall -lfl -ly -I src/
+EXEC=bin/tpcc
 
-LEXICAL = src/parser_lexical
-SYNTACTIC = src/parser_syntactic
+LEXICAL = parser_lexical
+SYNTACTIC = parser_syntactic
 
 TEST_SCRIPT = tests.sh
 
 all : $(EXEC)
 
-$(EXEC): $(LEXICAL).c $(SYNTACTIC).c src/abstract-tree.c src/abstract-tree.h src/symbol-table.c src/symbol-table.h
+$(EXEC): obj/$(LEXICAL).c obj/$(SYNTACTIC).c src/abstract-tree.c src/abstract-tree.h src/symbol-table.c src/symbol-table.h
 	$(CC) $^ -o $(EXEC) $(CFLAGS) $(LDFLAGS)
 
-$(SYNTACTIC).c : $(SYNTACTIC).y
+obj/$(SYNTACTIC).c : src/$(SYNTACTIC).y
 	bison -d $< -o $@ -ly
 
-$(LEXICAL).c: $(LEXICAL).flex
+obj/$(LEXICAL).c: src/$(LEXICAL).flex
 	flex -o $@ $<
 
 clean :
-	rm -f src/parser_*.c src/parser_*.h
+	rm -f obj/*
+	rm -f $(EXEC)
 
 test: $(EXEC)
 	bash $(TEST_SCRIPT)

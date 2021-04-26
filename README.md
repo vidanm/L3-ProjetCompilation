@@ -1,12 +1,9 @@
 # Projet de Compilation
 
 ### Compilation : 
-commande: `make`
+commande: `make`, l'exécutable produit s'appelle `tpcc`.
 
 ### Execution des tests :
-commande: `tests.sh`
-
+script: `tests.sh`
+ou par raccourci `make test`
 Le détail de l'éxécution des tests se trouve dans `test_results`
-
-### Redémarrage Après Erreur
-Le redémarrage après erreur n'étant pas totalement opérationnel, it ne prendre en compte que la première erreur donnée.

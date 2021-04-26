@@ -2,17 +2,17 @@ note=0
 total=0
 
 BASEDIR=$(dirname "$0")
-correct_tests=$BASEDIR/tests/correct/*.tpc
-incorrect_tests=$BASEDIR/tests/incorrect/*.tpc
+good_tests=$BASEDIR/test/good/*.tpc
+syn_err=$BASEDIR/test/syn-err/*.tpc
 
-AS=$BASEDIR/as
+AS=$BASEDIR/bin/tpcc
 
 OUTPUT=$BASEDIR/test_results
 
 printf "\nCORRECT\n\n"
 echo " CORRECT " > $OUTPUT
 echo " " >> $OUTPUT
-for f in $correct_tests
+for f in $good_tests
 do	
 	let total++
 	$AS < $f
@@ -37,7 +37,7 @@ echo " " >> $OUTPUT
 echo " INCORRECT " >> $OUTPUT
 echo " " >> $OUTPUT
 
-for f in $incorrect_tests
+for f in $syn_err
 do
 	echo " " >> $OUTPUT
 	let total++
