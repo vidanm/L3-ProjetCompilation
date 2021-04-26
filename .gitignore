@@ -1,10 +1,11 @@
 # executable
-as
+bin/tpcc
+
+
 
 # test result
 test_results
 
 # middle files
-parser_*.c
-parser_*.h
+obj/*
 

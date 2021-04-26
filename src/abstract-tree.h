@@ -79,7 +79,7 @@ void addChild(Node *parent, Node *child);
 
 /**
  * Set a string value for the node in the parametre.
- * Normally the string is an identifier.
+ * Normally the string is identifier.
  */
 void set_identifier(Node *node, char *identifier);
 

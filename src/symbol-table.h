@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* symbol in table */
+/* Symbol in table */
 typedef struct symbol {
 	char identifier[MAX_NAME_LENGTH];
 	int type;
@@ -32,42 +32,49 @@ typedef struct scope {
 	struct scope *father;
 } Scope;
 
+/* Definition of symbol table */
 typedef struct symbol_table{
 	Scope *current;
 } SymbolTable;
 
+/**
+ * Creat a empty table.
+ */
+SymbolTable *makeEmptySymbolTable();
+
+/**
+ * Add a scope in the symbol table
+ */
 void pushScope(SymbolTable *table);
 
+/** 
+ * Remove current scope from the symbol table 
+ */
 void popScope(SymbolTable *table);
 
+/**
+ * Insert a symbol to the current scope of the symbole table.
+ * 
+ * @param table table to insert the symbol
+ * @param identifier identifier of the symbol
+ * @param type type of the symbol
+ */
 void insertSymbol(SymbolTable *table, char identifier[], int type);
 
+/**
+ * Check the type of the symbol indicated by its identifier.
+ * 
+ * @param table table where to check symbol
+ * @param identifier identifier of the symbol
+ */
 int lookupSymbol(SymbolTable *table, char identifier[]);
 
+/**
+ * Print symbol table to standard out
+ */
 void printSymbolTable(SymbolTable *table);
 
-SymbolTable *makeTableFromAST(Node *tree);
 
 #define STR_EQUAL(s1, s2) (strcmp(s1,s2) == 0)
-
-
-
-// /**
-//  * Symbole table is global variable, which is list of pointer
-//  * that indicates to sub-tables in each scope.
-//  */
-// STentry *symbolTable[MAX_TABLES];
-
-// /* add an entry in the table of current scope */
-// void addVar(const char name[],int type);
-
-// /* print table */
-// void printTable();
-
-// /* create a symbole table from a AST */
-// void createTable(Node *node);
-
-// /* check if the name is already defined in the symbole table */
-// void isInTable(const char name[]);
 
 #endif
