@@ -12,3 +12,9 @@ int main(void)  {
    r3='4';
    return b;
 }
+
+int add(int a, int b){
+    int x, y, z;
+    char i, j;
+    return a+b;
+}
