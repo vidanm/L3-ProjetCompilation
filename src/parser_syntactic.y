@@ -36,8 +36,8 @@ Node *AST = NULL;
 %token <character>CHARACTER ADDSUB DIVSTAR
 %token <integer>NUM
 %token <identifier>IDENT
-%token <identifier>SIMPLETYPE ORDER EQ
-%token <integer>STRUCT
+%token <identifier>ORDER EQ
+%token <integer>STRUCT SIMPLETYPE
 %token <integer>VOID
 %token OR AND IF WHILE RETURN PRINT READC READE
 %left ')'
@@ -89,7 +89,7 @@ TypesVars:
     ;
 
 Type:
-       SIMPLETYPE  {  $$ = makeNode(TypeSimp); set_identifier($$, $1); }
+       SIMPLETYPE  {  $$ = makeNode(TypeSimp); $$->u.integer = $1; }
     | STRUCT IDENT {  $$ = makeNode(TypeStruct); set_identifier($$, $2); }
     ;
 Declarateurs:

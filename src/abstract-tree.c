@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "abstract-tree.h"
+#include "constant.h"
 extern int lineno;       /* from lexer */
 
 static const char *StringFromKind[] = {
@@ -107,7 +108,7 @@ void printTree(Node *node) {
     case IntLiteral: printf(": %d", node->u.integer); break;
     case CharLiteral: printf(": '%c'", node->u.character); break;
     case Identifier: printf(": %s", node->u.identifier); break;
-    case TypeSimp: printf(": %s", node->u.identifier); break;
+    case TypeSimp: printf(": %s", typeToString(node->u.integer)); break;
     case TypeStruct: printf(": %s", node->u.identifier); break;
     case DefFunctHead: printf(": %s", node->u.identifier); break;
     case Call: printf(": %s", node->u.identifier); break;

@@ -2,13 +2,14 @@
 #include "abstract-tree.h"
 #include "parser_syntactic.h"
 #include "symbol-table.h"
+#include "constant.h"
 #include <string.h>
 #include <stdlib.h>
+
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) record_input(buf, &result, max_size)
-#define TRUE 1
-#define FALSE 0
-#define COPY_STRING strcpy(yylval.identifier, yytext)
+
+#define COPY_YYTEXT strcpy(yylval.identifier, yytext)
 
 void record_input(char buf[], int *result, int max_size);
 
@@ -42,10 +43,10 @@ unsigned int charno=0;
 "||"			{ charno += yyleng;return OR; }
 "+"|"-"			{ charno += yyleng; yylval.character = yytext[0]; return ADDSUB; }
 "*"|"/"|"%"	        { charno += yyleng; yylval.character = yytext[0]; return DIVSTAR; }
-"<"|"<="|">"|>=		{ charno += yyleng; COPY_STRING; return ORDER; }
-==|!=			{ charno += yyleng; COPY_STRING; return EQ; }
-int			    { charno += yyleng; COPY_STRING; return SIMPLETYPE;}
-char		    { charno += yyleng; COPY_STRING; return SIMPLETYPE;}
+"<"|"<="|">"|>=		{ charno += yyleng; COPY_YYTEXT; return ORDER; }
+==|!=			{ charno += yyleng; COPY_YYTEXT; return EQ; }
+int			    { charno += yyleng; yylval.integer = TYPE_INT; return SIMPLETYPE;}
+char		    { charno += yyleng; yylval.integer = TYPE_CHAR; return SIMPLETYPE;}
 print			{ charno += yyleng;return PRINT; }
 readc			{ charno += yyleng;return READC; }
 reade			{ charno += yyleng;return READE; }
@@ -55,7 +56,7 @@ if			    { charno += yyleng;return IF; }
 else			{ charno += yyleng;return ELSE; }
 while			{ charno += yyleng;return WHILE; }
 return		    { charno += yyleng;return RETURN; }
-[a-zA-Z_][a-zA-Z0-9_]*  { charno += yyleng; COPY_STRING; return IDENT; }
+[a-zA-Z_][a-zA-Z0-9_]*  { charno += yyleng; COPY_YYTEXT; return IDENT; }
 [0-9]+			        { charno += yyleng; yylval.integer = atoi(yytext); return NUM;}
 '\\?.'			        { charno += yyleng; yylval.character = yytext[1]; return CHARACTER; }
 <<EOF>> 				return 0;

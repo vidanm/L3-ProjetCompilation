@@ -1,17 +1,15 @@
 #include "build_table.h"
 
-int typeStrToInt(char *strType) {
-    if (STR_EQUAL(strType, "int")) {
-        return TYPE_INT;
-    } else if (STR_EQUAL(strType, "char")) {
-        return TYPE_CHAR;
-    } else {
+int handleType(Node *type){
+    if (type->kind == TypeStruct){
         return TYPE_STRUCT;
     }
+    return type->u.integer;
 }
 
+
 void handleGlobeVar(Node *globeVar, SymbolTable *table) {
-    int sym_type = typeStrToInt(globeVar->firstChild->u.identifier);
+    int sym_type = handleType(globeVar->firstChild);
     Node *identifiers = globeVar->firstChild->nextSibling;
     for (Node *sibling = identifiers; sibling != NULL;
          sibling = sibling->nextSibling) {
@@ -26,7 +24,7 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
         return;
     }
     while (param != NULL) {
-        int sym_type = typeStrToInt(param->firstChild->u.identifier);
+        int sym_type = handleType(param->firstChild);
         insertSymbol(table, param->u.identifier, sym_type);
         param = param->nextSibling;
     }
@@ -35,7 +33,7 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     Node *declVar = defCorps->firstChild;
     while (declVar != NULL && declVar->kind == DeclVar) {
-        int type = typeStrToInt(declVar->firstChild->u.identifier);
+        int type = handleType(declVar->firstChild);
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
             sibling = sibling->nextSibling) {
             insertSymbol(t, sibling->u.identifier, type);

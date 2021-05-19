@@ -1,6 +1,5 @@
 #include "symbol-table.h"
 
-char *StringFromType[] = {"void", "int", "char", "struct"};
 
 Symbol *makeSymbol(char *identifier, int type) {
     Symbol *s = (Symbol *)malloc(sizeof(Symbol));
@@ -57,7 +56,7 @@ int lookupSymbol(SymbolTable *table, char identifier[]) {
 }
 
 void printSymbol(Symbol *s) {
-    printf("| %s : %s |\n", s->identifier, StringFromType[s->type]);
+    printf("| %s : %s |\n", s->identifier, typeToString(s->type));
 }
 
 void printScope(Scope *s) {

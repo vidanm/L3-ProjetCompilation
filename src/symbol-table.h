@@ -9,12 +9,8 @@
 /* max nomber of table */
 #define MAX_TABLES 128
 
-#define TYPE_VOID 0
-#define TYPE_INT 1
-#define TYPE_CHAR 2
-#define TYPE_STRUCT 3
-
 #include "abstract-tree.h"
+#include "constant.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
