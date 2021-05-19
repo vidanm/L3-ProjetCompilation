@@ -6,7 +6,7 @@ EXEC=bin/tpcc
 LEXICAL = parser_lexical
 SYNTACTIC = parser_syntactic
 
-OBJS = obj/$(LEXICAL).c obj/$(SYNTACTIC).c src/abstract-tree.c src/abstract-tree.h src/symbol-table.c src/symbol-table.h src/build_table.c src/build_table.h
+OBJS = obj/$(LEXICAL).c obj/$(SYNTACTIC).c $(shell ls src/*.c)
 
 TEST_SCRIPT = tests.sh
 
