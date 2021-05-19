@@ -1,6 +1,8 @@
-# executable
-bin/tpcc
+# binary file
+bin/*
 
+# other file
+*.zip
 
 
 # test result
@@ -8,4 +10,7 @@ test_results
 
 # middle files
 obj/*
+
+# IDE file
+.vscode/*
 
