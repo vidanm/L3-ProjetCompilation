@@ -20,8 +20,8 @@ do
 	result=$?
 	if [ $result -eq 0 ]
 	then
-		printf "$f \x1b[32m processed successfully\n \x1b[0m"
-		echo "[ $f processed successfully ]" >> $OUTPUT
+		printf "$f \x1b[32m processed successfully\n \x1b[0m\n"
+		echo "[ $f processed successfully ]\n" >> $OUTPUT
 		let note++
 	else
 		printf "$f \x1b[31m error processing\n \x1b[0m"
