@@ -1,10 +1,27 @@
 #include "symbol-table.h"
 
+SymbolType *makeSymbolType(int type, char *name, Symbol *member[], int memberSize){
+    SymbolType *st = (SymbolType*)malloc(sizeof(SymbolType));
+    st->type = type;
+    strcpy(st->name, name);
+    for(int i = 0; i < memberSize; i++){
+        st->member[i] = member[i];
+    }
+    st->memberSize = memberSize;
+    return st;
+}
 
-Symbol *makeSymbol(char *identifier, int type) {
+/**
+ * If two symbol types have the same type and name, they are equal.
+ */
+int equalSymbolType(SymbolType *st1, SymbolType *st2){
+    return st1->type == st2->type && (strcmp(st1->name, st1->name) == 0);
+}
+
+Symbol *makeSymbol(char *identifier, int type_descriptor) {
     Symbol *s = (Symbol *)malloc(sizeof(Symbol));
     strcpy(s->identifier, identifier);
-    s->type = type;
+    s->type_descriptor = type_descriptor;
     return s;
 }
 
@@ -18,6 +35,15 @@ Scope *makeScope(Scope *father) {
 SymbolTable *makeEmptySymbolTable() {
     SymbolTable *t = (SymbolTable *)malloc(sizeof(SymbolTable));
     t->current = NULL;
+
+    SymbolType *the_void = makeSymbolType(TYPE_VOID, typeToString(TYPE_VOID), NULL, 0);
+    SymbolType *the_int = makeSymbolType(TYPE_INT, typeToString(TYPE_INT), NULL, 0);
+    SymbolType *the_char = makeSymbolType(TYPE_CHAR, typeToString(TYPE_CHAR), NULL, 0);
+    
+    t->typeDefined[0] = the_void;
+    t->typeDefined[1] = the_int;
+    t->typeDefined[2] = the_char;
+    t->type_size = 3;
     return t;
 }
 
@@ -36,18 +62,35 @@ void popScope(SymbolTable *table) {
     freeScope(old_scope);
 }
 
-void insertSymbol(SymbolTable *table, char identifier[], int type) {
+void insertSymbol(SymbolTable *table, char identifier[], int type_descriptor) {
     Scope *current_scope = table->current;
-    current_scope->symbols[current_scope->size] = makeSymbol(identifier, type);
+    current_scope->symbols[current_scope->size] = makeSymbol(identifier, type_descriptor);
     current_scope->size += 1;
+}
+
+/**
+ * Insert a definition of type to symbol table.
+ */
+int insertType(SymbolTable *table, SymbolType *type){
+    SymbolType **typeDefined = table->typeDefined;
+    for(int i = 0; i < table->type_size; i++){
+        if (equalSymbolType(typeDefined[i], type))
+        {
+            return -1;
+        }
+        
+    }
+    typeDefined[table->type_size] = type;
+    table->type_size ++;
+    return  table->type_size -1;
 }
 
 int lookupSymbol(SymbolTable *table, char identifier[]) {
     Scope *cur = table->current;
     while (cur != NULL) {
-        for (size_t i = 0; i < cur->size; i++) {
+        for (size_t i = 0; i < cur -> size; i++) {
             if (STR_EQUAL(cur->symbols[i]->identifier, identifier)) {
-                return cur->symbols[i]->type;
+                return cur->symbols[i]->type_descriptor;
             }
         }
         cur = cur->father;
@@ -55,138 +98,29 @@ int lookupSymbol(SymbolTable *table, char identifier[]) {
     return -1;
 }
 
-void printSymbol(Symbol *s) {
-    printf("| %s : %s |\n", s->identifier, typeToString(s->type));
+void printSymbol(SymbolTable *table, Symbol *s) {
+    if(s->type_descriptor == -1){
+        printf("| %s : %s |\n", s->identifier, "unknown structure");
+        return;
+    }
+    SymbolType *st = table-> typeDefined[s->type_descriptor];
+    printf("| %s : %s |\n", s->identifier, st->name);
 }
 
-void printScope(Scope *s) {
+void printScope(SymbolTable *t, Scope *s) {
     if (s->father != NULL) {
-        printScope(s->father);
+        printScope(t, s->father);
     }
     printf("------------ Scope --------------\n");
+    printf("scope size: %d\n", s->size);
     for (int i = 0; i < s->size; i++) {
         Symbol *sym = s->symbols[i];
-        printSymbol(sym);
+        printSymbol(t, sym);
     }
     printf("------------  End  --------------\n");
 }
 
 void printSymbolTable(SymbolTable *t) {
     printf("Symbol Table\n");
-    printScope(t->current);
+    printScope(t, t->current);
 }
-
-// STentry *symbolTable[MAX_TABLES]; /* Tableau d'adresses vers les tables
-//  globales/locales */
-//
-// int STmax = MAX_SYMBOL_NUM;
-// int STSize[MAX_TABLES]; /* Nombres de symboles dans each sub-table */
-// int STNumber = 0;       /* Nomber of sub-tables */
-// int current_type = 0;
-//
-// /**
-//  * Append a new sub-table to symbole table
-//  */
-// void appendST() {
-// STentry *table;
-// table = (STentry *)malloc(MAX_SYMBOL_NUM * sizeof(STentry));
-// symbolTable[STNumber] = table;
-// STSize[STNumber] = 0;
-// STNumber += 1;
-// }
-//
-// /**
-//  * Pop up current sub-table, all content will be cleared
-//  */
-// void popST() {
-// free(symbolTable[STNumber]);
-// symbolTable[STNumber] = NULL;
-// STSize[STNumber] = 0;
-// STNumber -= 1;
-// }
-//
-// /**
-//  * Add a entry into current scope's sub-table, record its name and type
-//  */
-// void addVar(const char name[], int type) {
-// STentry *current_table = symbolTable[STNumber-1];
-//
-//
-// int i, j;
-// for (i = 0; i < STNumber; i++) {
-// for (j = 0; j < STSize[STNumber]; j++) {
-// if (!strcmp(symbolTable[i][j].name, name)) {
-// printf("Redefinition de la variable %s", name);
-// return;
-// }
-// }
-// }
-//
-// if (STNumber == 0) {
-// appendST();
-// }
-//
-// if (++(STSize[STNumber - 1]) > STmax) {
-// printf("too many variables near line \n");
-// exit(1);
-// }
-//
-// strcpy(symbolTable[STNumber - 1][(STSize[STNumber - 1]) - 1].name, name);
-// symbolTable[STNumber - 1][(STSize[STNumber - 1]) - 1].type = type;
-// }
-//
-// void createTable(Node *node) {
-// while (node != NULL) {
-// switch (node->kind) {
-// case Type:
-// current_type = node->u.integer;
-// break;
-// case Identifier:
-// isInTable(node->u.identifier);
-// default:
-// break;
-// }
-//
-// if (node->firstChild != NULL) {
-// createTable(node->firstChild);
-// }
-//
-// node = node->nextSibling;
-// }
-// }
-//
-// void isInTable(const char name[]) {
-// int i, j, declared = 0;
-// for (i = 0; i < STNumber; i++) {
-// for (j = 0; j < STSize[i]; j++) {
-// if (!strcmp(symbolTable[i][j].name, name)) {
-// declared = 1;
-// break;
-// }
-// }
-// if (declared == 1) break;
-// }
-//
-// if (!declared)
-// printf(
-// "\x1b[31mUtilisation de la variable %s sans l'avoir déclaré\x1b[0m "
-// "\n",
-// name);
-// }
-//
-// void printTable() {
-// int i, j;
-// printf("\x1b[34mTABLE DES SYMBOLES\n=============\x1b[0m\n");
-// for (i = 0; i < STNumber; i++) {
-// if (i == 0)
-// printf("TABLE GLOBALE \n");
-// else
-// printf("TABLE LOCALE %d \n", i);
-// for (j = 0; j < STSize[i]; j++) {
-// printf("%s : %s\n", StringFromType[symbolTable[i][j].type],
-//    symbolTable[i][j].name);
-// }
-// printf("\n");
-// }
-// printf("\n\n");
-// }

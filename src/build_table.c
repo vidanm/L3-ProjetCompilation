@@ -1,19 +1,30 @@
 #include "build_table.h"
 
-int handleType(Node *type){
-    if (type->kind == TypeStruct){
-        return TYPE_STRUCT;
+
+/**
+ *  Return the descriptor of the type in the node, or -1 in case of not existe.
+ */
+int handleType(Node *type, SymbolTable *table){
+    switch(type->kind){
+        case TypeSimp:{
+            // by definition of constant, its value is just the descriptor
+            return type->u.integer;
+        }case TypeStruct:{
+            return lookupSymbol(table, type->u.identifier);
+        }
+        default:{
+            return -1;
+        }
     }
-    return type->u.integer;
 }
 
 
 void handleGlobeVar(Node *globeVar, SymbolTable *table) {
-    int sym_type = handleType(globeVar->firstChild);
+    int td = handleType(globeVar->firstChild, table);
     Node *identifiers = globeVar->firstChild->nextSibling;
     for (Node *sibling = identifiers; sibling != NULL;
          sibling = sibling->nextSibling) {
-        insertSymbol(table, sibling->u.identifier, sym_type);
+        insertSymbol(table, sibling->u.identifier, td);
     }
 }
 
@@ -32,7 +43,7 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
         return;
     }
     while (param != NULL) {
-        int sym_type = handleType(param->firstChild);
+        int sym_type = handleType(param->firstChild, table);
         insertSymbol(table, param->u.identifier, sym_type);
         param = param->nextSibling;
     }
@@ -48,10 +59,11 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     Node *declVar = defCorps->firstChild;
     while (declVar != NULL && declVar->kind == DeclVar) {
-        int type = handleType(declVar->firstChild);
+        int td = handleType(declVar->firstChild, t);
+        // TODO after insert type check td, in case of -1, error undefine type.
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
             sibling = sibling->nextSibling) {
-            insertSymbol(t, sibling->u.identifier, type);
+            insertSymbol(t, sibling->u.identifier, td);
         }
         declVar = declVar->nextSibling;
     }

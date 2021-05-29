@@ -10,6 +10,18 @@ OBJS = obj/$(LEXICAL).c obj/$(SYNTACTIC).c $(shell ls src/*.c)
 
 TEST_SCRIPT = tests.sh
 
+OBJ = $(firstword $(wildcard obj))
+BIN = $(firstword $(wildcard bin))
+
+ifeq (,$(OBJ))
+  $(shell mkdir obj)
+endif
+
+ifeq (,$(BIN))
+  $(shell mkdir bin)
+endif
+
+
 all : $(EXEC)
 
 $(EXEC): $(OBJS)
