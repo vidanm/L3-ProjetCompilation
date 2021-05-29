@@ -131,6 +131,9 @@ DeclFonct:
             addChild($$, $2);
         }
     ;
+
+/* The first child is the return type of function (void or any possible Type)
+    the second child is the AST node "Parametres" to put parametres of the function */
 EnTeteFonct:
        Type IDENT '(' Parametres ')' {
                     $$ = makeNode(DefFunctHead);
@@ -145,12 +148,15 @@ EnTeteFonct:
 				    addChild($$, $4);
                 }
     ;
+/* Declaration of parametres of function, in case of void, it's a AST Void node, otherwise
+    a AST ParaTypVar Node */
 Parametres:
        VOID         { $$ = makeNode(Void); }
     |  ListTypVar   { $$ = $1; }
     |  /* empty */  {$$ = makeNode(Void);}
     ;
-/* save type and name as local variable */
+/* Parametres of function, non void, linked list of ParaTypVar, for each element, its
+    child is a AST Type node, and its identifier is the name of parametre */
 ListTypVar:
        ListTypVar ',' Type IDENT {
             Node *paraTypVar = makeNode(ParaTypVar);
@@ -171,6 +177,7 @@ Corps: '{' DeclVars SuiteInstr '}'      {
                 addChild($$, $3);
 			}
     ;
+/* Declarations of local variable of function */
 DeclVars:
         DeclVars Type Declarateurs ';' {
             Node *n = makeNode(DeclVar);

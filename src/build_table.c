@@ -17,7 +17,15 @@ void handleGlobeVar(Node *globeVar, SymbolTable *table) {
     }
 }
 
+
+/**
+ * Handle the node "DefFunctHead" of AST, it creates a new scope in the
+ * symbol table for following locaux symbols and insert 
+ * 
+ * 
+ */
 void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
+    // add a scope to table
     pushScope(table);
     Node *param = SECONDCHILD(defFunctHead);
     if (param->kind == Void) {
@@ -30,6 +38,13 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
     }
 }
 
+/**
+ * Handle the node "DefFunctCorps" of AST, it insert all local symbols
+ * to the symbol table, and // TODO does type checking on following instructions.
+ * 
+ * @param defCorps, the pointer to AST "DefFunctCorps" Node.
+ * @param t, the pointer to the symbol table.
+ */
 void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     Node *declVar = defCorps->firstChild;
     while (declVar != NULL && declVar->kind == DeclVar) {
@@ -41,6 +56,7 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
         declVar = declVar->nextSibling;
     }
 }
+
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
     if (node->kind == Program) {
@@ -59,6 +75,12 @@ void handleNodeAndScope(Node *node, SymbolTable *t) {
     }
 }
 
+/**
+ * Construct symbol table from a AST.
+ * 
+ * Return:
+ *  A pointer to a symbol table.
+ */
 SymbolTable *makeTableFromAST(Node *tree) {
     SymbolTable *table = makeEmptySymbolTable();
     handleNodeAndScope(tree, table);
