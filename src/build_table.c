@@ -19,6 +19,7 @@ int handleType(Node *type, SymbolTable *table) {
                 fprintf(stderr, "struct not defined: %s\n", type->u.identifier);
                 exit(SMEERR_EXIT);
             }
+            return td;
         }
         default: {
             fprintf(stderr, "unknown type type: %d\n", type->kind);
@@ -113,7 +114,10 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     Node *declVar = defCorps->firstChild;
     while (declVar != NULL && declVar->kind == DeclVar) {
+        printTree(declVar);
+        printTree(declVar->firstChild);
         int td = handleType(declVar->firstChild, t);
+        printf("function corp:%d\n", td);
         // TODO after insert type check td, in case of -1, error undefine type.
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
              sibling = sibling->nextSibling) {
