@@ -22,12 +22,19 @@
 struct symbol;
 
 typedef struct symbol_type {
-	/* type of type -> void, int, char, struct */
+	/* type of type -> void 0, int 1, char 2, struct 3, function 4*/
 	int type;
-	/* name of type -> void, int, char, or name of struct */ 
+	/* name of type -> void, int, char, name of struct, name of function */ 
 	char name[MAX_NAME_LENGTH];
-	/* in case of struct type */
+	/**
+	 * in case of struct type, the members will be here
+	 * in case of function,first element will be return type, the rest are parametres
+	 *  */
 	struct symbol *member[MAX_MEMBER_NUMBER];
+	/** 
+	 * in case of struct, member size
+	 * in case of function, parametre size, with out return type
+	 */
 	int memberSize;
 } SymbolType;
 
@@ -64,29 +71,34 @@ SymbolTable *makeEmptySymbolTable();
 
 /**
  * Create a type definition.
- * In case of simple type, put NULL and 0 at last 2 arg.
+ * the name will be copied by strcpy
+ * In case of simple type, put NULL and 0 in the last 2 arg.
  * 
  */
 SymbolType *makeSymbolType(int type, char *name, Symbol *member[], int memberSize);
 
 /**
- * Add a scope in the symbol table
+ * Insert a definition of type to symbol table.
+ * 
+ * @return type_descriptor (positive),
+ * or -1 in case of duplicate definition.
  */
-void pushScope(SymbolTable *table);
+int insertType(SymbolTable *table, SymbolType *type);
 
-/** 
- * Remove current scope from the symbol table 
- */
-void popScope(SymbolTable *table);
+int hasType(SymbolTable *table, SymbolType *type);
+
+
+/** make a symbol */
+Symbol *makeSymbol(char *identifier, int type_descriptor);
 
 /**
  * Insert a symbol to the current scope of the symbole table.
  * 
  * @param table table to insert the symbol
  * @param identifier identifier of the symbol
- * @param type type of the symbol
+ * @param type_descriptor type descriptor of the symbol
  */
-void insertSymbol(SymbolTable *table, char identifier[], int type);
+void insertSymbol(SymbolTable *table, char identifier[], int type_descriptor);
 
 /**
  * Check the type of the symbol indicated by its identifier.
@@ -99,12 +111,14 @@ void insertSymbol(SymbolTable *table, char identifier[], int type);
 int lookupSymbol(SymbolTable *table, char identifier[]);
 
 /**
- * Insert a definition of type to symbol table.
- * 
- * @return type_descriptor (positive),
- * or -1 in case of duplicate definition.
+ * Add a scope in the symbol table
  */
-int insertType(SymbolTable *table, SymbolType *type);
+void pushScope(SymbolTable *table);
+
+/** 
+ * Remove current scope from the symbol table 
+ */
+void popScope(SymbolTable *table);
 
 /**
  * Print symbol table to standard out

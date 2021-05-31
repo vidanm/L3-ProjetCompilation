@@ -1,3 +1,3 @@
 #include "constant.h"
 
-char *type_string[] = {"void", "int", "char", "struct"};
+char *type_string[] = {"void", "int", "char", "struct", "function"};

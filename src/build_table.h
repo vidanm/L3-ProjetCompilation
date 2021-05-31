@@ -5,8 +5,7 @@
  * module.
  */
 
-#include<abstract-tree.h>
-#include<symbol-table.h>
-
+#include "abstract-tree.h"
+#include "symbol-table.h"
 
 SymbolTable *makeTableFromAST(Node *tree);

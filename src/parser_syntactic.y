@@ -133,7 +133,9 @@ DeclFonct:
     ;
 
 /* The first child is the return type of function (void or any possible Type)
-    the second child is the AST node "Parametres" to put parametres of the function */
+    the second child is the AST node "Parametres",
+    name of the function is in u.identifier
+*/
 EnTeteFonct:
        Type IDENT '(' Parametres ')' {
                     $$ = makeNode(DefFunctHead);
@@ -156,7 +158,7 @@ Parametres:
     |  /* empty */  {$$ = makeNode(Void);}
     ;
 /* Parametres of function, non void, linked list of ParaTypVar, for each element, its
-    child is a AST Type node, and its identifier is the name of parametre */
+    child is a AST "Type" node, and its identifier is the name of parametre */
 ListTypVar:
        ListTypVar ',' Type IDENT {
             Node *paraTypVar = makeNode(ParaTypVar);
