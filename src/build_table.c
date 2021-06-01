@@ -1,7 +1,14 @@
 #include "build_table.h"
 
 /**
- *  Return the descriptor of the type in the node, or -1 in case of not existe.
+ * Check validation of AST type node.
+ * 
+ * If its a void or simple type(int, char), return its type descriptor;
+ * 
+ * If its a struct, check whether it has been defined, if not print error information
+ * to stderr and exit with semantical error code, otherwise return its type descriptor.
+ * 
+ * If node type unknown, print error msg to stderr and return its node type.
  */
 int handleType(Node *type, SymbolTable *table) {
     switch (type->kind) {
@@ -127,14 +134,42 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     }
 }
 
+
+/**
+ * Converst a list of struct member into list of symbols,
+ * type checking will be performed during the transformation.
+ *
+ * @return  in case of invalid type in the member, return -1,
+ * otherwise, the number of members will be returned.
+ */
+int handleStructMembers(Node *members, Symbol *member_symbols[],
+                     SymbolTable *table) {
+
+    Node *begin = members;
+    int i = 0;
+    while (begin != NULL && begin->kind == DeclChamp) {
+        int td = handleType(begin->firstChild, table);
+        if (td == -1) {
+            return -1;
+        }
+        Symbol *s = makeSymbol(begin->u.identifier, td);
+        // params_symbols[i] = s;
+        // i++;
+        printTree(begin);
+        begin = begin->nextSibling;
+    }
+    return i;
+}
+
+
+
 void handleStructDef(Node *structDef, SymbolTable *table) {
-    printf("We have a struct def\n");
     Symbol **struct_symbols =
         (Symbol **)malloc(sizeof(Symbol *) * MAX_MEMBER_NUMBER);
 
+    printTree(structDef);
     // parser struct member as array of symbols
-    int size = handleParametres(FIRSTCHILD(structDef), struct_symbols, table);
-    printf("member size: %d\n", size);
+    int size = handleStructMembers(FIRSTCHILD(structDef), struct_symbols, table);
 
     // combine them as function type
     SymbolType *structType = makeSymbolType(
