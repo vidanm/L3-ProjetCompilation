@@ -2,12 +2,13 @@
 
 /**
  * Check validation of AST type node.
- * 
+ *
  * If its a void or simple type(int, char), return its type descriptor;
- * 
- * If its a struct, check whether it has been defined, if not print error information
- * to stderr and exit with semantical error code, otherwise return its type descriptor.
- * 
+ *
+ * If its a struct, check whether it has been defined, if not print error
+ * information to stderr and exit with semantical error code, otherwise return
+ * its type descriptor.
+ *
  * If node type unknown, print error msg to stderr and return its node type.
  */
 int handleType(Node *type, SymbolTable *table) {
@@ -20,7 +21,8 @@ int handleType(Node *type, SymbolTable *table) {
             return type->u.integer;
         }
         case TypeStruct: {
-            SymbolType *structType = makeSymbolType(TYPE_STRUCT, type->u.identifier, NULL, 0);
+            SymbolType *structType =
+                makeSymbolType(TYPE_STRUCT, type->u.identifier, NULL, 0);
             int td = hasType(table, structType);
             if (td == -1) {
                 fprintf(stderr, "struct not defined: %s\n", type->u.identifier);
@@ -31,7 +33,7 @@ int handleType(Node *type, SymbolTable *table) {
         default: {
             fprintf(stderr, "unknown type type: %d\n", type->kind);
             return type->kind;
-            //exit(-1);
+            // exit(-1);
         }
     }
 }
@@ -134,7 +136,6 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     }
 }
 
-
 /**
  * Converst a list of struct member into list of symbols,
  * type checking will be performed during the transformation.
@@ -143,8 +144,7 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
  * otherwise, the number of members will be returned.
  */
 int handleStructMembers(Node *members, Symbol *member_symbols[],
-                     SymbolTable *table) {
-
+                        SymbolTable *table) {
     Node *begin = members;
     int i = 0;
     while (begin != NULL && begin->kind == DeclChamp) {
@@ -152,35 +152,48 @@ int handleStructMembers(Node *members, Symbol *member_symbols[],
         if (td == -1) {
             return -1;
         }
-        Symbol *s = makeSymbol(begin->u.identifier, td);
-        // params_symbols[i] = s;
-        // i++;
+        Node *identifier = begin->firstChild->nextSibling;
+        while (identifier != NULL && identifier->kind == Identifier) {
+            Symbol *s = makeSymbol(identifier->u.identifier, td);
+            member_symbols[i] = s;
+            i++;
+            identifier = identifier->nextSibling;
+            printf("add %s at %d\n", s->identifier, i);
+        }
+
         printTree(begin);
         begin = begin->nextSibling;
     }
     return i;
 }
 
-
-
 void handleStructDef(Node *structDef, SymbolTable *table) {
     Symbol **struct_symbols =
         (Symbol **)malloc(sizeof(Symbol *) * MAX_MEMBER_NUMBER);
 
-    printTree(structDef);
-    // parser struct member as array of symbols
-    int size = handleStructMembers(FIRSTCHILD(structDef), struct_symbols, table);
-
+    int size = 0;
     // combine them as function type
     SymbolType *structType = makeSymbolType(
         TYPE_STRUCT, structDef->u.identifier, struct_symbols, size);
-    // insert this type to symbol table
+
+    /*
+    insert this type to symbol table, insert the type before parse its member
+    to enable self contains as a member.
+    */
     int td = insertType(table, structType);
-    printf("inserted at %d\n", td);
+    printf("inserted %s at %d\n", structDef->u.identifier, td);
     if (td == -1) {
         fprintf(stderr, "Duplicated definition of structure %s\n",
                 structDef->u.identifier);
         exit(SMEERR_EXIT);
+    }
+    // parser struct member as array of symbols
+    size = handleStructMembers(FIRSTCHILD(structDef), struct_symbols, table);
+    printf("new size: %d\n", size);
+    table->typeDefined[td]->memberSize = size;
+    printf("adr1:%p adr2:%p\n", table->typeDefined[td]->member, struct_symbols);
+    for (int i = 0; i < size; i++) {
+        table->typeDefined[td]->member[i] = struct_symbols[i];
     }
 }
 

@@ -1,5 +1,7 @@
 #include "symbol-table.h"
 
+void symbolToString(SymbolTable *table, Symbol *s, char buf[]);
+
 void symbolTypeToString(SymbolType *type, char buf[], SymbolTable *table) {
     switch (type->type) {
         case TYPE_VOID: {
@@ -15,7 +17,22 @@ void symbolTypeToString(SymbolType *type, char buf[], SymbolTable *table) {
             break;
         }
         case TYPE_STRUCT: {
-            sprintf(buf, "struct %s", type->name);
+            sprintf(buf, "struct %s {", type->name);
+            char mem_buf[256];
+            for (int i = 0; i < type->memberSize; i++) {
+                Symbol *member = type->member[i];
+
+                if (equalSymbolType(table->typeDefined[member->type_descriptor], type)) {
+                    sprintf(mem_buf, "struct %s, ", type->name);
+                    strcat(buf, mem_buf);
+                } else {
+                    symbolToString(table, member, mem_buf);
+                    strcat(buf, mem_buf);
+                    strcat(buf, ", ");
+                }
+            }
+            strcpy(buf + strlen(buf) - 2, "}");
+
             break;
         }
         case TYPE_FUNC: {
@@ -32,9 +49,7 @@ void symbolTypeToString(SymbolType *type, char buf[], SymbolTable *table) {
                 strcat(buf, "(");
                 char param_buf[256];
                 for (int i = 1; i < type->memberSize; i++) {
-                    int td = type->member[i]->type_descriptor;
-                    symbolTypeToString(table->typeDefined[td], param_buf,
-                                       table);
+                    symbolToString(table, type->member[i], param_buf);
                     strcat(buf, param_buf);
                     strcat(buf, ", ");
                 }
@@ -48,23 +63,33 @@ void symbolTypeToString(SymbolType *type, char buf[], SymbolTable *table) {
     }
 }
 
-void printParametres(Symbol *params[], SymbolTable *table) { ; }
+void symbolToString(SymbolTable *table, Symbol *s, char buf[]) {
+    char type_buf[256];
+    symbolTypeToString(table->typeDefined[s->type_descriptor], type_buf, table);
+    if (table->typeDefined[s->type_descriptor]->type != TYPE_FUNC) {
+        strcat(type_buf, " ");
+        strcat(type_buf, s->identifier);
+    }
+    strcpy(buf, type_buf);
+}
 
 void printSymbolType(SymbolTable *table, int type_descriptor) {
-    static int depth = 0;  // depth of current node
     char buf[256];
     symbolTypeToString(table->typeDefined[type_descriptor], buf, table);
     printf("%s", buf);
 }
 
 void printSymbol(SymbolTable *table, Symbol *s) {
-    printSymbolType(table, s->type_descriptor);
-    if (table->typeDefined[s->type_descriptor]->type != TYPE_FUNC) {
-        putchar(' ');
-        printf("%s\n", s->identifier);
-    } else {
-        putchar('\n');
-    }
+    char buf[256];
+    symbolToString(table, s, buf);
+    printf("%s\n", buf);
+    // printSymbolType(table, s->type_descriptor);
+    // if (table->typeDefined[s->type_descriptor]->type != TYPE_FUNC) {
+    //     putchar(' ');
+    //     printf("%s\n", s->identifier);
+    // } else {
+    //     putchar('\n');
+    // }
 }
 
 void printScope(SymbolTable *t, Scope *s) {
@@ -80,7 +105,18 @@ void printScope(SymbolTable *t, Scope *s) {
     printf("------------  End  --------------\n");
 }
 
+void printDefinedType(SymbolTable *t) {
+    printf("----------Defined Type-----------\n");
+    for (int i = 0; i < t->type_size; i++) {
+        printSymbolType(t, i);
+        putchar('\n');
+    }
+    printf("---------------------------------\n");
+
+}
+
 void printSymbolTable(SymbolTable *t) {
     printf("Symbol Table\n");
+    printDefinedType(t);
     printScope(t, t->current);
 }

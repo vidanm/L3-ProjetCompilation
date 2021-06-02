@@ -125,6 +125,8 @@ void popScope(SymbolTable *table);
  */
 void printSymbolTable(SymbolTable *table);
 
+int equalSymbolType(SymbolType *st1, SymbolType *st2);
+
 
 #define STR_EQUAL(s1, s2) (strcmp(s1,s2) == 0)
 
