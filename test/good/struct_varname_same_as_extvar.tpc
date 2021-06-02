@@ -1,5 +1,5 @@
 struct hello { int x; int y; };
 
-int main(void){
+int main(int i, int j){
 	struct hello x;
 }
