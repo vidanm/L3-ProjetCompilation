@@ -6,6 +6,7 @@
 #include "abstract-tree.h"
 #include "symbol-table.h"
 #include "build_table.h"
+#include "asm_generation.h"
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -22,6 +23,7 @@ extern int charno;
 extern char line[200];
 
 Node *AST = NULL;
+FILE *file;
 %}
 
 /* %define parse.error verbose */
@@ -96,10 +98,12 @@ Declarateurs:
        Declarateurs ',' IDENT { 
                 Node *id = makeNode(Identifier);
                 set_identifier(id, $3);
-				addSibling($1, id);
+		addSibling($1, id);
                 $$ = $1;
-			}
-    |  IDENT { $$ = makeNode(Identifier); set_identifier($$, $1);}
+		}
+    |  IDENT { $$ = makeNode(Identifier);
+		set_identifier($$, $1);
+		}
     ;
 
 DeclChamps :
@@ -362,14 +366,15 @@ int yyerror(const char *s) {
 }
 
 int main(void){
+	
+	file =  fopen("bss.asm","w+");
+	fprintf(file,"SECTION .bss\n");
 	if (yyparse() == 1){
-		return 1;
+	return 1;
 	}
-    printTree(AST);
-    SymbolTable *table = makeTableFromAST(AST);
-    printSymbolTable(table);
-    // printTable();
-	//createTable(AST);
+	printTree(AST);
+	SymbolTable *table = makeTableFromAST(AST);
+	printSymbolTable(table);
 
 	return 0;
 }	

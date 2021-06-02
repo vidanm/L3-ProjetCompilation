@@ -1,4 +1,6 @@
 #include "build_table.h"
+#include "asm_generation.h"
+extern FILE* file;
 
 /**
  *  Return the descriptor of the type in the node, or -1 in case of not existe.
@@ -34,7 +36,8 @@ void handleGlobeVar(Node *globeVar, SymbolTable *table) {
     Node *identifiers = globeVar->firstChild->nextSibling;
     for (Node *sibling = identifiers; sibling != NULL;
          sibling = sibling->nextSibling) {
-        insertSymbol(table, sibling->u.identifier, td);
+            declareASMVar(file,sibling->u.identifier,td);
+	    insertSymbol(table, sibling->u.identifier, td);
     }
 }
 
