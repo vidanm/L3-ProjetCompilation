@@ -368,12 +368,14 @@ int yyerror(const char *s) {
 int main(void){
 	
 	file =  fopen("bss.asm","w+");
-	fprintf(file,"SECTION .bss\n");
+	fprintf(file,"section .bss\n");
 	if (yyparse() == 1){
 	return 1;
 	}
 	printTree(AST);
 	SymbolTable *table = makeTableFromAST(AST);
+
+	ASTtoASM(file,AST); /* ASM File generation */ 
 	printSymbolTable(table);
 
 	return 0;
