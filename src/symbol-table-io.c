@@ -51,7 +51,7 @@ void symbolTypeToString(SymbolType *type, char buf[], SymbolTable *table) {
 void printParametres(Symbol *params[], SymbolTable *table) { ; }
 
 void printSymbolType(SymbolTable *table, int type_descriptor) {
-    static int depth = 0;  // depth of current node
+    /* static int depth = 0;  // depth of current node */
     char buf[256];
     symbolTypeToString(table->typeDefined[type_descriptor], buf, table);
     printf("%s", buf);
