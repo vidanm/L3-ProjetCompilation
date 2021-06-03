@@ -36,7 +36,7 @@ void handleGlobeVar(Node *globeVar, SymbolTable *table) {
     Node *identifiers = globeVar->firstChild->nextSibling;
     for (Node *sibling = identifiers; sibling != NULL;
          sibling = sibling->nextSibling) {
-            declareASMVar(file,sibling->u.identifier,td);
+            reserveGlobalVarAdress(file,sibling->u.identifier,td);
 	    insertSymbol(table, sibling->u.identifier, td);
     }
 }

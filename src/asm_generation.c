@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include "abstract-tree.h"
+extern table /* Symbol Table */
 
-void declareASMVar(FILE *file,char* name,int type){
-	
+void reserveGlobalVarAdress(FILE *file,char* name,int type){
 	switch (type){
 		case 2:
 			fprintf(file,"%s:	resb 1\n",name);
 			break;
 		case 0:
-			fprintf(file,"%s:	resw 1\n",name);
 			break;
 		case 1:
 			fprintf(file,"%s:	resb 32\n",name);
@@ -21,18 +20,26 @@ void declareASMVar(FILE *file,char* name,int type){
 	}
 }
 
-void handleAffectation(FILE *file,char* name,Node *value){
-	
-	if (value->kind == IntLiteral)
-		 fprintf(file,"mov word [%s], %d\n",name,value->u.integer);
+void pushLocalOnStack(Node *n){
+	/* TODO: Need to add address references in symbol table ?*/
+	switch (n->child->u.integer) /* type */ {
+		case 1:
+			fprintf(file,"push	%d",n->child->sibling->u.integer); /* Wrong definition in
+										      syntactic parser */
+			break;
+		case 2:
+			fprintf(file,"push	'%c'",n->child->sibling->u.character);
+			break;
+		default:
+			break;
+		
+	}
 }
 
-void ASTtoASM(FILE *file,Node *n){
-	if (n->kind == Move){
-		handleAffectation(file,n->firstChild->u.identifier,n->firstChild->nextSibling);
-	}
-	for (Node *child = n->firstChild; child != NULL;
-			child = child->nextSibling){
-		ASTtoASM(file,child);
+void popLocalOnStack(Node *n){
+	/* pop from the stack as many times as the size of the local symbol table */
+	symbolTable = table;
+	for (i = 0; i < symbolTable->current->size; i++){
+		fprintf(file,"pop	eax");
 	}
 }
