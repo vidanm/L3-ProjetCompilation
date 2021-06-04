@@ -22,3 +22,7 @@ void asmif();
 void asmor();
 
 void asmand();
+
+void write_main_section();
+
+void write_bss_section();

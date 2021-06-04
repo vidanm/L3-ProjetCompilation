@@ -55,6 +55,16 @@ void iload(SymbolTable* table,char *ident){
 	fprintf(file,"mov [rsp+%d], rax",address);
 }
 
+void write_main_section(){
+	fprintf(file,"\nsection .text\n");
+	fprintf(file,"\t global _start\n");
+	fprintf(file,"_start:\n");
+}
+
+void write_bss_section(){
+	fprintf(file,"section .bss\n");
+}
+
 void asmif(){;}
 
 void asmor(){;}

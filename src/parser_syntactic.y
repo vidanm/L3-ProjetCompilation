@@ -54,10 +54,16 @@ FILE *file;
 Prog:  TypesVars DeclFoncts { 
 			        $$ = makeNode(Program);
     			    if ($1 != NULL) {
-    			        addSibling($1,$2);
-				        addChild($$,$1);
+					Node *n = makeNode(GlobVarsSection);
+					Node *n2 = makeNode(FuncSection);
+					addSibling(n,n2);
+					addChild(n,$1);
+					addChild(n2,$2);
+				        addChild($$,n);
 			        } else{
-			      		addChild($$,$2);
+					Node *n = makeNode(FuncSection);
+					addChild($$,n);
+			      		addChild(n,$2);
                     }
                     AST = $$;
 			      }
@@ -370,7 +376,6 @@ int main(void){
 	
 	actual_stack_size = 0;
 	file =  fopen("bss.asm","w+");
-	fprintf(file,"section .bss\n");
 	if (yyparse() == 1){
 	return 1;
 	}

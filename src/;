@@ -156,38 +156,24 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
 }
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
-    switch (node->kind){
-	case Program:
-		pushScope(t);
-		break;
-	case GlobeVar:
-		handleGlobeVar(node,t);
-		break;
-	case DefFunctHead:
-		handleEnTeteFunct(node, t);
-		break;
-	case DefFunctCorps:
-		handleDefFunctCorps(node, t);
-		break;
-	case DefStruct:
-		handleStructDef(node, t);
-		break;
-	case FuncSection:
-		write_main_section();
-		break;
-	case GlobVarsSection:
-		write_bss_section();
-		break;
-	default:
-		break;
-	}
-	for (Node *child = node->firstChild; child != NULL;
-         	     child = child->nextSibling) {
-        		handleNodeAndScope(child, t);
-    		}
+    if (node->kind == Program) {
+        pushScope(t);
+    } else if (node->kind == GlobeVar) {
+        handleGlobeVar(node, t);
+    } else if (node->kind == DefFunctHead) {
+        handleEnTeteFunct(node, t);
+    } else if (node->kind == DefFunctCorps) {
+        handleDefFunctCorps(node, t);
+    } else if (node->kind == DefStruct) {
+        handleStructDef(node, t);
+    } else if (node->kind == FuncSection) {
 
+    }
     // deep first search
-    
+    for (Node *child = node->firstChild; child != NULL;
+         child = child->nextSibling) {
+        handleNodeAndScope(child, t);
+    }
 }
 
 /**
