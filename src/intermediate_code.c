@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "intermediate_code.h"
+#include "symbol-table.h"
 
-extern file;
+extern FILE* file;
 
 void imul(){
 	fprintf(file,"pop rbx\n");
@@ -31,11 +32,11 @@ void isub(){
 	fprintf(file,"push rbx\n");
 }
 
-void istore(char* ident){
-	fprintf(file,"pop qword[%s]\n",ident);
+void istoreglob(char* ident){
+	fprintf(file,"pop qword[%s]\n",ident); 
 }
 
-void iload(char* ident){
+void iloadglob(char* ident){
 	fprintf(file,"push qword[%s]\n",ident);
 }
 
@@ -43,3 +44,19 @@ void ldc(int value){
 	/* push constant to stack */
 	fprintf(file,"push qword %d",value);
 }
+
+void istore(SymbolTable* table,char *ident){
+	int address = getSymbolAddress(table,ident);
+	fprintf(file,"mov rax, [rsp+%d]",address); 
+}
+
+void iload(SymbolTable* table,char *ident){
+	int address = getSymbolAddress(table,ident);
+	fprintf(file,"mov [rsp+%d], rax",address);
+}
+
+void asmif(){;}
+
+void asmor(){;}
+
+void asmand(){;}

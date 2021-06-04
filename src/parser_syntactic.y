@@ -17,6 +17,7 @@
 
 int yylex();
 int yyerror(const char *);
+int actual_stack_size;
 extern int lineno;
 extern char yytext[];
 extern int charno;
@@ -367,6 +368,7 @@ int yyerror(const char *s) {
 
 int main(void){
 	
+	actual_stack_size = 0;
 	file =  fopen("bss.asm","w+");
 	fprintf(file,"section .bss\n");
 	if (yyparse() == 1){
@@ -375,7 +377,6 @@ int main(void){
 	printTree(AST);
 	SymbolTable *table = makeTableFromAST(AST);
 
-	ASTtoASM(file,AST); /* ASM File generation */ 
 	printSymbolTable(table);
 
 	return 0;

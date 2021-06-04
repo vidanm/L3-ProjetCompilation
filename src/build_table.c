@@ -1,5 +1,6 @@
 #include "build_table.h"
 #include "asm_generation.h"
+#include "intermediate_code.h"
 extern FILE* file;
 
 /**
