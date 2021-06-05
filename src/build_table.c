@@ -1,22 +1,25 @@
 #include "build_table.h"
 
-#include "asm_generation.h"
-#include "intermediate_code.h"
 extern FILE *file;
 
 /**
  * Check validation of AST type node.
- *
+ * @p
  * This function is potential exit, when meeting a undefined struct, this
  * function exit program with SMEERR_EXIT.
- *
+ * @p
  * If its a void or simple type(int, char), return its type descriptor;
- *
+ * @p
  * If its a struct, check whether it has been defined, if not print error
  * information to stderr and exit with semantical error code, otherwise return
  * its type descriptor.
+ * @p
+ * In case that the node type's kind is unknown,
+ * exit program with OTHERF_EXIT, this is a runtime error,
+ * node Type shouldn't be other kind than Void, TypeSimp or TypeStruct.
  *
- * If node type unknown, print error msg to stderr and return its node type.
+ * @return the correspodant type descriptor
+ *
  */
 int handleType(Node *type, SymbolTable *table) {
     switch (type->kind) {
@@ -38,9 +41,10 @@ int handleType(Node *type, SymbolTable *table) {
             return td;
         }
         default: {
-            fprintf(stderr, "unknown type type: %d\n", type->kind);
-            return type->kind;
-            // exit(-1);
+            fprintf(stderr,
+                    "Runtime error, type node is neither void, int, char, nor "
+                    "a struct\n");
+            exit(OTHERF_EXIT);
         }
     }
 }
@@ -89,6 +93,7 @@ int handleParametres(Node *params, Symbol *params_symbols[],
  *
  */
 void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
+    // !! Global scope part
     Symbol **func_symbols =
         (Symbol **)malloc(sizeof(Symbol *) * MAX_MEMBER_NUMBER);
     // parser function return type
@@ -108,8 +113,9 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
     // insert function as a symbol
     insertSymbol(table, defFunctHead->u.identifier, td);
     ldc(0); /* push 0 to stack */
-    // add a scope to table
-    pushScope(table);
+
+    // !! local scope part, add a scope to table
+    pushScope(table, defFunctHead->u.identifier);
     Node *param = SECONDCHILD(defFunctHead);
     if (param->kind == Void) {
         return;
@@ -122,9 +128,15 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 }
 
 /**
- * Handle the node "DefFunctCorps" of AST, it insert all local symbols
+ * @p
+ * Handle the node "DefFunctCorps" of AST, it inserts all local symbols
  * to the symbol table, and // TODO does type checking on following
  * instructions.
+ * @p
+ * defCorps is a linked list of node, each node contains 2 children,
+ * the first is node Type, the seconde is a linked list of node Identifier.
+ *
+ * This function performs a sementic check, the variable type can not be void.
  *
  * @param defCorps, the pointer to AST "DefFunctCorps" Node.
  * @param t, the pointer to the symbol table.
@@ -132,18 +144,21 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     Node *declVar = defCorps->firstChild;
     while (declVar != NULL && declVar->kind == DeclVar) {
-        printTree(declVar);
-        printTree(declVar->firstChild);
         int td = handleType(declVar->firstChild, t);
-        printf("function corp:%d\n", td);
-        // TODO after insert type check td, in case of -1, error undefine type.
+        // by definition of grammar, void is not a type,
+        // no need to check
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
              sibling = sibling->nextSibling) {
             insertSymbol(t, sibling->u.identifier, td);
-            ldc(0); /* push 0 to stack */
         }
         declVar = declVar->nextSibling;
     }
+    // TODO perform semantic analyse in expressions
+
+    if (f_table) {
+        printCurrentScope(t);
+    }
+    popScope(t);
 }
 
 /**
@@ -169,8 +184,6 @@ int handleStructMembers(Node *members, Symbol *member_symbols[],
             i++;
             identifier = identifier->nextSibling;
         }
-
-        printTree(begin);
         begin = begin->nextSibling;
     }
     return i;
@@ -204,9 +217,8 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
     }
     // parser struct member as array of symbols
     size = handleStructMembers(FIRSTCHILD(structDef), struct_symbols, table);
-    printf("new size: %d\n", size);
+    // record member information
     table->typeDefined[td]->memberSize = size;
-    printf("adr1:%p adr2:%p\n", table->typeDefined[td]->member, struct_symbols);
     for (int i = 0; i < size; i++) {
         table->typeDefined[td]->member[i] = struct_symbols[i];
     }
@@ -215,7 +227,8 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
 void handleNodeAndScope(Node *node, SymbolTable *t) {
     switch (node->kind) {
         case Program:
-            pushScope(t);
+            // push the scope for global variable and function
+            pushScope(t, "Global");
             break;
         case GlobeVar:
             handleGlobeVar(node, t);
