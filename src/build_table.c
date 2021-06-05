@@ -1,13 +1,14 @@
 #include "build_table.h"
+
 #include "asm_generation.h"
 #include "intermediate_code.h"
-extern FILE* file;
+extern FILE *file;
 
 /**
  * Check validation of AST type node.
- * 
- * This function is potential exit, when meeting a undefined struct, this function
- * exit program with SMEERR_EXIT.
+ *
+ * This function is potential exit, when meeting a undefined struct, this
+ * function exit program with SMEERR_EXIT.
  *
  * If its a void or simple type(int, char), return its type descriptor;
  *
@@ -49,8 +50,8 @@ void handleGlobeVar(Node *globeVar, SymbolTable *table) {
     Node *identifiers = globeVar->firstChild->nextSibling;
     for (Node *sibling = identifiers; sibling != NULL;
          sibling = sibling->nextSibling) {
-            reserveGlobalVarAdress(file,sibling->u.identifier,td);
-	    insertSymbol(table, sibling->u.identifier, td);
+        reserveGlobalVarAdress(file, sibling->u.identifier, td);
+        insertSymbol(table, sibling->u.identifier, td);
     }
 }
 
@@ -139,7 +140,7 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
              sibling = sibling->nextSibling) {
             insertSymbol(t, sibling->u.identifier, td);
-    	    ldc(0); /* push 0 to stack */
+            ldc(0); /* push 0 to stack */
         }
         declVar = declVar->nextSibling;
     }
@@ -175,6 +176,12 @@ int handleStructMembers(Node *members, Symbol *member_symbols[],
     return i;
 }
 
+/**
+ * Handle struct definition.
+ * This function is a potentiel exit, when meeting a duplication
+ * of structure definition, it will exit with SEMERR_EXIT.
+ *
+ */
 void handleStructDef(Node *structDef, SymbolTable *table) {
     Symbol **struct_symbols =
         (Symbol **)malloc(sizeof(Symbol *) * MAX_MEMBER_NUMBER);
@@ -184,10 +191,11 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
     SymbolType *structType = makeSymbolType(
         TYPE_STRUCT, structDef->u.identifier, struct_symbols, size);
 
-    /*
-    insert this type to symbol table, insert the type before parse its member
-    to enable self contains as a member.
-    */
+    /**
+     * Insert this struct as a type to symbol table.
+     * Insert the type before parsing its member
+     * to enable self containing member.
+     */
     int td = insertType(table, structType);
     if (td == -1) {
         fprintf(stderr, "Duplicated definition of structure %s\n",
@@ -205,38 +213,37 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
 }
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
-    switch (node->kind){
-	case Program:
-		pushScope(t);
-		break;
-	case GlobeVar:
-		handleGlobeVar(node,t);
-		break;
-	case DefFunctHead:
-		handleEnTeteFunct(node, t);
-		break;
-	case DefFunctCorps:
-		handleDefFunctCorps(node, t);
-		break;
-	case DefStruct:
-		handleStructDef(node, t);
-		break;
-	case FuncSection:
-		write_main_section();
-		break;
-	case GlobVarsSection:
-		write_bss_section();
-		break;
-	default:
-		break;
-	}
-	for (Node *child = node->firstChild; child != NULL;
-         	     child = child->nextSibling) {
-        		handleNodeAndScope(child, t);
-    		}
+    switch (node->kind) {
+        case Program:
+            pushScope(t);
+            break;
+        case GlobeVar:
+            handleGlobeVar(node, t);
+            break;
+        case DefFunctHead:
+            handleEnTeteFunct(node, t);
+            break;
+        case DefFunctCorps:
+            handleDefFunctCorps(node, t);
+            break;
+        case DefStruct:
+            handleStructDef(node, t);
+            break;
+        case FuncSection:
+            write_main_section();
+            break;
+        case GlobVarsSection:
+            write_bss_section();
+            break;
+        default:
+            break;
+    }
+    for (Node *child = node->firstChild; child != NULL;
+         child = child->nextSibling) {
+        handleNodeAndScope(child, t);
+    }
 
     // deep first search
-    
 }
 
 /**
