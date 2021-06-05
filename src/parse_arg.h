@@ -1,3 +1,6 @@
+#ifndef PA_H
+#define PA_H
+
 #include <getopt.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -24,3 +27,7 @@ int parse_arg(int argc, char *argv[]);
  * Print help message to stdout
  */
 void help_reaction();
+
+
+
+#endif
