@@ -1,4 +1,5 @@
-#include "symbol-table.h"
+#include "symbol-table-io.h"
+#define SEP "= = = = = = =\n"
 
 void symbolToString(SymbolTable *table, Symbol *s, char buf[]);
 
@@ -92,31 +93,34 @@ void printSymbol(SymbolTable *table, Symbol *s) {
     // }
 }
 
-void printScope(SymbolTable *t, Scope *s) {
-    if (s->father != NULL) {
-        printScope(t, s->father);
-    }
-    printf("------------ Scope --------------\n");
+void printCurrentScope(SymbolTable *t){
+    Scope *s = t->current;
+    printf("== Scope %s ==\n", s->name);
     printf("scope size: %d\n", s->size);
     for (int i = 0; i < s->size; i++) {
         Symbol *sym = s->symbols[i];
         printSymbol(t, sym);
     }
-    printf("------------  End  --------------\n");
+    printf(SEP);
+}
+
+void printScope(SymbolTable *t, Scope *s) {
+    if (s->father != NULL) {
+        printScope(t, s->father);
+    }
+    printCurrentScope(t);
 }
 
 void printDefinedType(SymbolTable *t) {
-    printf("----------Defined Type-----------\n");
+    printf("== Defined Type ==\n");
     for (int i = 0; i < t->type_size; i++) {
         printSymbolType(t, i);
         putchar('\n');
     }
-    printf("---------------------------------\n");
-
+    printf(SEP);
 }
 
 void printSymbolTable(SymbolTable *t) {
-    printf("Symbol Table\n");
-    printDefinedType(t);
     printScope(t, t->current);
+    printDefinedType(t);
 }

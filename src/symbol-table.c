@@ -29,10 +29,11 @@ Symbol *makeSymbol(char *identifier, int type_descriptor) {
     return s;
 }
 
-Scope *makeScope(Scope *father) {
+Scope *makeScope(Scope *father, char *name) {
     Scope *s = (Scope *)malloc(sizeof(Scope));
     s->size = 0;
     s->father = father;
+    strcpy(s->name, name);
     return s;
 }
 
@@ -58,8 +59,8 @@ SymbolTable *makeEmptySymbolTable() {
 /* not implemented, wait OS to do its job */
 void freeScope(Scope *s) { ; }
 
-void pushScope(SymbolTable *table) {
-    Scope *cur = makeScope(table->current);
+void pushScope(SymbolTable *table, char *name) {
+    Scope *cur = makeScope(table->current, name);
     table->current = cur;
 }
 
@@ -94,7 +95,6 @@ int hasType(SymbolTable *table, SymbolType *type){
  * Insert a definition of type to symbol table.
  */
 int insertType(SymbolTable *table, SymbolType *type) {
-    printf("Trying to insert type %d %s \n", type->type, type->name);
     if(hasType(table, type) != -1)
         return -1;
     table->typeDefined[table->type_size] = type;
