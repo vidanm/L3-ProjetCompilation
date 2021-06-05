@@ -3,10 +3,14 @@
 /* Syntaxe du TPC pour le projet d'analyse syntaxique de 2020-2021*/
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+
 #include "abstract-tree.h"
 #include "symbol-table.h"
 #include "build_table.h"
 #include "asm_generation.h"
+#include "parse_arg.h"
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -372,17 +376,31 @@ int yyerror(const char *s) {
 	return 1;
 }
 
-int main(void){
-	
+int main(int argc, char *argv[]){
+
+    int res = parse_arg(argc, argv);
+    if(res == -1){
+        exit(OTHERF_EXIT);
+    }
+
+    if(f_help){
+        help_reaction();
+        exit(NORMAL_EXIT);
+    }
+
 	actual_stack_size = 0;
 	file =  fopen("bss.asm","w+");
 	if (yyparse() == 1){
 	return 1;
 	}
+    if(f_tree){
 	printTree(AST);
+    }
 	SymbolTable *table = makeTableFromAST(AST);
 
+    if(f_table){
 	printSymbolTable(table);
+    }
 
 	return 0;
 }	
