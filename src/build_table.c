@@ -29,7 +29,7 @@ int handleType(Node *type, SymbolTable *table) {
             int td = hasType(table, structType);
             if (td == -1) {
                 fprintf(stderr, "struct not defined: %s\n", type->u.identifier);
-                exit(SMEERR_EXIT);
+                exit(SEMERR_EXIT);
             }
             return td;
         }
@@ -191,7 +191,7 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
     if (td == -1) {
         fprintf(stderr, "Duplicated definition of structure %s\n",
                 structDef->u.identifier);
-        exit(SMEERR_EXIT);
+        exit(SEMERR_EXIT);
     }
     // parser struct member as array of symbols
     size = handleStructMembers(FIRSTCHILD(structDef), struct_symbols, table);
