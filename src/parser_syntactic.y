@@ -6,6 +6,7 @@
 #include "abstract-tree.h"
 #include "symbol-table.h"
 #include "build_table.h"
+#include "asm_generation.h"
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -16,12 +17,14 @@
 
 int yylex();
 int yyerror(const char *);
+int actual_stack_size;
 extern int lineno;
 extern char yytext[];
 extern int charno;
 extern char line[200];
 
 Node *AST = NULL;
+FILE *file;
 %}
 
 /* %define parse.error verbose */
@@ -51,10 +54,16 @@ Node *AST = NULL;
 Prog:  TypesVars DeclFoncts { 
 			        $$ = makeNode(Program);
     			    if ($1 != NULL) {
-    			        addSibling($1,$2);
-				        addChild($$,$1);
+					Node *n = makeNode(GlobVarsSection);
+					Node *n2 = makeNode(FuncSection);
+					addSibling(n,n2);
+					addChild(n,$1);
+					addChild(n2,$2);
+				        addChild($$,n);
 			        } else{
-			      		addChild($$,$2);
+					Node *n = makeNode(FuncSection);
+					addChild($$,n);
+			      		addChild(n,$2);
                     }
                     AST = $$;
 			      }
@@ -96,10 +105,12 @@ Declarateurs:
        Declarateurs ',' IDENT { 
                 Node *id = makeNode(Identifier);
                 set_identifier(id, $3);
-				addSibling($1, id);
+		addSibling($1, id);
                 $$ = $1;
-			}
-    |  IDENT { $$ = makeNode(Identifier); set_identifier($$, $1);}
+		}
+    |  IDENT { $$ = makeNode(Identifier);
+		set_identifier($$, $1);
+		}
     ;
 
 DeclChamps :
@@ -362,14 +373,16 @@ int yyerror(const char *s) {
 }
 
 int main(void){
+	
+	actual_stack_size = 0;
+	file =  fopen("bss.asm","w+");
 	if (yyparse() == 1){
-		return 1;
+	return 1;
 	}
-    printTree(AST);
-    SymbolTable *table = makeTableFromAST(AST);
-    printSymbolTable(table);
-    // printTable();
-	//createTable(AST);
+	printTree(AST);
+	SymbolTable *table = makeTableFromAST(AST);
+
+	printSymbolTable(table);
 
 	return 0;
 }	

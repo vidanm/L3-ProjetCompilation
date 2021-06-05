@@ -20,6 +20,7 @@
 #include <string.h>
 
 struct symbol;
+extern int actual_stack_size;
 
 typedef struct symbol_type {
 	/* type of type -> void 0, int 1, char 2, struct 3, function 4*/
@@ -43,6 +44,7 @@ typedef struct symbol_type {
 typedef struct symbol {
 	char identifier[MAX_NAME_LENGTH];
 	int type_descriptor;
+	int stack_address;
 } Symbol;
 
 
@@ -127,6 +129,7 @@ void printSymbolTable(SymbolTable *table);
 
 int equalSymbolType(SymbolType *st1, SymbolType *st2);
 
+int getSymbolAddress(SymbolTable *table, char identifier[]);
 
 #define STR_EQUAL(s1, s2) (strcmp(s1,s2) == 0)
 
