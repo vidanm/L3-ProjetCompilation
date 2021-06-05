@@ -5,6 +5,9 @@ extern FILE* file;
 
 /**
  * Check validation of AST type node.
+ * 
+ * This function is potential exit, when meeting a undefined struct, this function
+ * exit program with SMEERR_EXIT.
  *
  * If its a void or simple type(int, char), return its type descriptor;
  *
@@ -164,7 +167,6 @@ int handleStructMembers(Node *members, Symbol *member_symbols[],
             member_symbols[i] = s;
             i++;
             identifier = identifier->nextSibling;
-            printf("add %s at %d\n", s->identifier, i);
         }
 
         printTree(begin);
@@ -187,7 +189,6 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
     to enable self contains as a member.
     */
     int td = insertType(table, structType);
-    printf("inserted %s at %d\n", structDef->u.identifier, td);
     if (td == -1) {
         fprintf(stderr, "Duplicated definition of structure %s\n",
                 structDef->u.identifier);
