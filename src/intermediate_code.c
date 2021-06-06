@@ -66,12 +66,17 @@ void iload(SymbolTable* table,char *ident){
 }
 
 void write_main_section(){
+	
 	fprintf(file,"\nsection .text\n");
 	fprintf(file,"\t global _start\n");
 	fprintf(file,"_start:\n");
 }
 
 void write_bss_section(){
+	char c = '%';
+	fprintf(file,"%c",c);
+	fprintf(file,"include 'functions.asm'\n");
+
 	fprintf(file,"section .bss\n");
 }
 
@@ -96,7 +101,7 @@ void asmeq(){
 	fprintf(file,"cmp rax, rbx\n");
 } */
 
-void iprint(SymbolTable* table,char * ident){
+void iprint(){
 	/* Ne fonctionne pas 
 	 *
 	int address = getSymbolAddress(table,ident);
@@ -105,6 +110,9 @@ void iprint(SymbolTable* table,char * ident){
 	fprintf(file,"call printf\n");
 	fprintf(file,"add esp, 8\n\n");
 	*/
-}
 
+	fprintf(file,";iprint()\n");
+	fprintf(file,"pop rax\n");
+	fprintf(file,"call iprintLF\n");
+}
 
