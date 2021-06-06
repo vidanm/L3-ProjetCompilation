@@ -17,6 +17,8 @@ void iload(SymbolTable * table, char* ident); /* write ASM code to push ident va
 
 void ldc(int value); /* write ASM code to push constant value to the stack */
 
+void iprint();
+
 void asmif();
 
 void asmor();
