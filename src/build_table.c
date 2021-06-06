@@ -287,6 +287,8 @@ void handleNodeAndScope(Node *node, SymbolTable *t) {
 	case IntLiteral:
 		ldc(node->u.integer);
 		break;
+	case Print:
+		iprint();
 	default:
 		break;
 
