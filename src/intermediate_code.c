@@ -75,7 +75,7 @@ void write_main_section(){
 void write_bss_section(){
 	char c = '%';
 	fprintf(file,"%c",c);
-	fprintf(file,"include 'functions.asm'\n");
+	fprintf(file,"include '../src/functions.asm'\n");
 
 	fprintf(file,"section .bss\n");
 }
