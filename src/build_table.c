@@ -112,10 +112,8 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 
     // insert function as a symbol
     insertSymbol(table, defFunctHead->u.identifier, td);
-    ldc(0); /* push 0 to stack */
-
-    // !! local scope part, add a scope to table
-    pushScope(table, defFunctHead->u.identifier);
+    // add a scope to table
+    pushScope(table);
     Node *param = SECONDCHILD(defFunctHead);
     if (param->kind == Void) {
         return;
@@ -225,37 +223,61 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
 }
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
-    switch (node->kind) {
-        case Program:
-            // push the scope for global variable and function
-            pushScope(t, "Global");
-            break;
-        case GlobeVar:
-            handleGlobeVar(node, t);
-            break;
-        case DefFunctHead:
-            handleEnTeteFunct(node, t);
-            break;
-        case DefFunctCorps:
-            handleDefFunctCorps(node, t);
-            break;
-        case DefStruct:
-            handleStructDef(node, t);
-            break;
-        case FuncSection:
-            write_main_section();
-            break;
-        case GlobVarsSection:
-            write_bss_section();
-            break;
-        default:
-            break;
-    }
+
+    
+
+    switch (node->kind){ /* Set variable in symbolTable */ 
+	case Program:
+		pushScope(t);
+		break;
+	case GlobeVar:
+		handleGlobeVar(node,t);
+		break;
+	case DefFunctHead:
+		handleEnTeteFunct(node, t);
+		break;
+	case DefFunctCorps:
+		handleDefFunctCorps(node, t);
+		break;
+	case DefStruct:
+		handleStructDef(node, t);
+		break;
+	case FuncSection:
+		write_main_section();
+		break;
+	case GlobVarsSection:
+		write_bss_section();
+		break;
+	default:
+		break;
+	}
+
     for (Node *child = node->firstChild; child != NULL;
-         child = child->nextSibling) {
-        handleNodeAndScope(child, t);
+        child = child->nextSibling) {
+	handleNodeAndScope(child, t);
     }
 
+    switch (node->kind){
+	case DeclVar:
+		ldc(0);
+		break;
+	case Move:
+		/* evaluate Expr and store on the stack */
+		iload(t,node->firstChild->u.identifier); /* pop the stack and store the value */
+		break;
+	case UnaryAddSub:
+		iadd();
+		break;
+	case DivStar:
+		imul();
+		break;
+	case IntLiteral:
+		ldc(node->u.integer);
+		break;
+	default:
+		break;
+
+    }
     // deep first search
 }
 
