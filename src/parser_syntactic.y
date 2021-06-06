@@ -211,8 +211,11 @@ DeclVars:
     ;
 /* May be NULL */
 SuiteInstr:
-        SuiteInstr Instr { 
-            if ($1 != NULL){
+        SuiteInstr Instr {
+            if ($2 == NULL){
+                $$ = $1;
+            }
+            else if ($1 != NULL){
                 addSibling($1, $2);
                 $$ = $1;
             }else{

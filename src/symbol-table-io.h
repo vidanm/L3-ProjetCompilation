@@ -7,7 +7,15 @@ void printSymbolTable(SymbolTable *t);
 
 void printCurrentScope(SymbolTable *t);
 
+/**
+ * Print semantic error message in stderr.
+ */
 void print_sem_error(char *msg);
+
+/**
+ * Print warning message to stdout.
+ */
+void warning(char *msg);
 
 #endif
 

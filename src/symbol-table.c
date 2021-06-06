@@ -77,10 +77,10 @@ void insertSymbol(SymbolTable *table, char identifier[], int type_descriptor) {
     current_scope->size += 1;
 
     actual_stack_size += 8; /* update stack index,
-			       all elements are qwords for testing */ 
+                               all elements are qwords for testing */
 }
 
-int hasType(SymbolTable *table, SymbolType *type){
+int hasType(SymbolTable *table, SymbolType *type) {
     SymbolType **typeDefined = table->typeDefined;
     for (int i = 0; i < table->type_size; i++) {
         if (equalSymbolType(typeDefined[i], type)) {
@@ -90,13 +90,11 @@ int hasType(SymbolTable *table, SymbolType *type){
     return -1;
 }
 
-
 /**
  * Insert a definition of type to symbol table.
  */
 int insertType(SymbolTable *table, SymbolType *type) {
-    if(hasType(table, type) != -1)
-        return -1;
+    if (hasType(table, type) != -1) return -1;
     table->typeDefined[table->type_size] = type;
     table->type_size++;
     return table->type_size - 1;
@@ -115,7 +113,27 @@ int lookupSymbol(SymbolTable *table, char identifier[]) {
     return -1;
 }
 
-int getSymbolAddress(SymbolTable *table, char identifier[]){
+/**
+ * Get type descriptor of a struct member.
+ * Because of grammer, one can't access a member by member of other struct,
+ * so no need to search recursively
+ */
+int lookupStructSymbol(SymbolTable *t, char *identifier, char *memberName) {
+    int struct_td = lookupSymbol(t, identifier);
+    if(struct_td == -1){
+        return -2;
+    }
+    SymbolType *the_struct = t->typeDefined[struct_td];
+    for (int i = 0; i < the_struct->memberSize; i++) {
+        Symbol *member = the_struct->member[i];
+        if (strcmp(member->identifier, memberName) == 0) {
+            return member->type_descriptor;
+        }
+    }
+    return -1;
+}
+
+int getSymbolAddress(SymbolTable *table, char identifier[]) {
     Scope *cur = table->current;
     while (cur != NULL) {
         for (size_t i = 0; i < cur->size; i++) {

@@ -14,6 +14,8 @@
 #include "asm_generation.h"
 #include "intermediate_code.h"
 #include "parse_arg.h"
+#include "check_expression.h"
+#include "check_instruction.h"
 
 SymbolTable *makeTableFromAST(Node *tree);
 
