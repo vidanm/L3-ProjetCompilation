@@ -1,0 +1,17 @@
+struct hello{
+	int x;
+	int y;
+};
+
+struct yes{
+	struct hello h;
+	int y;
+	int x;
+};
+
+// can not access member with depth greater than 2
+int main (void){
+	struct yes y1;
+	int x;
+    x = y1.h.x;
+}

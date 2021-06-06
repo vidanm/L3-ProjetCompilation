@@ -1,0 +1,13 @@
+struct hello{
+	int x;
+	int y;
+};
+// error logical operation between int and hello
+int main (void){
+	int x;
+	struct hello h1;
+	if (x + h1)
+		return 1;
+	else 
+		return 0;
+}

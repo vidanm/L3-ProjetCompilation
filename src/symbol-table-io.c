@@ -124,3 +124,11 @@ void printSymbolTable(SymbolTable *t) {
     printScope(t, t->current);
     printDefinedType(t);
 }
+
+void print_sem_error(char *msg){
+    fprintf(stderr, "Semantic error: %s\n", msg);
+}
+
+void warning(char *msg){
+    fprintf(stdout, "Warning: %s\n", msg);
+}

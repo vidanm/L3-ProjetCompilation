@@ -113,6 +113,15 @@ void insertSymbol(SymbolTable *table, char identifier[], int type_descriptor);
  */
 int lookupSymbol(SymbolTable *table, char identifier[]);
 
+
+/**
+ * Return type descriptor of struct member.
+ * 
+ * @return return type descriptor in case of success, 
+ * -1 if member not found, -2 if struct itself not found.
+ */
+int lookupStructSymbol(SymbolTable *t, char *structName, char *memberName);
+
 /**
  * Add a scope in the symbol table
  */
@@ -126,6 +135,8 @@ void popScope(SymbolTable *table);
 int equalSymbolType(SymbolType *st1, SymbolType *st2);
 
 int getSymbolAddress(SymbolTable *table, char identifier[]);
+
+
 
 #define STR_EQUAL(s1, s2) (strcmp(s1,s2) == 0)
 

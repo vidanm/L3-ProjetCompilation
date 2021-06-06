@@ -1,0 +1,14 @@
+int main(void){
+	int x;
+    char y;
+	// pass value mismatch
+	x = y;
+    y = x;
+
+	// read unexpected
+	readc (x);
+	reade (y);
+
+
+	return 0;
+}

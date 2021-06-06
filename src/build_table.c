@@ -3,20 +3,20 @@
 extern FILE *file;
 
 /**
- * Check validation of AST type node.
+ * Checks validation of AST type node.
  * @p
  * This function is potential exit, when meeting a undefined struct, this
  * function exit program with SMEERR_EXIT.
  * @p
- * If its a void or simple type(int, char), return its type descriptor;
+ * If it's void or simple type(int, char), returns its type descriptor;
  * @p
- * If its a struct, check whether it has been defined, if not print error
+ * If it's struct, checks whether it has been defined, if not, prints error
  * information to stderr and exit with semantical error code, otherwise return
  * its type descriptor.
  * @p
  * In case that the node type's kind is unknown,
  * exit program with OTHERF_EXIT, this is a runtime error,
- * node Type shouldn't be other kind than Void, TypeSimp or TypeStruct.
+ * node Type shouldn't be other kinds than Void, TypeSimp or TypeStruct.
  *
  * @return the correspodant type descriptor
  *
@@ -43,7 +43,7 @@ int handleType(Node *type, SymbolTable *table) {
         default: {
             fprintf(stderr,
                     "Runtime error, type node is neither void, int, char, nor "
-                    "a struct\n");
+                    "struct\n");
             exit(OTHERF_EXIT);
         }
     }
@@ -112,8 +112,10 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 
     // insert function as a symbol
     insertSymbol(table, defFunctHead->u.identifier, td);
-    // add a scope to table
-    pushScope(table);
+
+    // !! local scope part, add a scope to table
+    pushScope(table, defFunctHead->u.identifier);
+
     Node *param = SECONDCHILD(defFunctHead);
     if (param->kind == Void) {
         return;
@@ -132,9 +134,8 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
  * instructions.
  * @p
  * defCorps is a linked list of node, each node contains 2 children,
- * the first is node Type, the seconde is a linked list of node Identifier.
+ * the first is node Type, the seconde is a linked list of the node Identifier.
  *
- * This function performs a sementic check, the variable type can not be void.
  *
  * @param defCorps, the pointer to AST "DefFunctCorps" Node.
  * @param t, the pointer to the symbol table.
@@ -144,18 +145,28 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     while (declVar != NULL && declVar->kind == DeclVar) {
         int td = handleType(declVar->firstChild, t);
         // by definition of grammar, void is not a type,
-        // no need to check
+        // no need to check return value.
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
              sibling = sibling->nextSibling) {
             insertSymbol(t, sibling->u.identifier, td);
         }
         declVar = declVar->nextSibling;
     }
-    // TODO perform semantic analyse in expressions
+    // perform semantic analyse on instr
+    if(declVar != NULL){
+        Node *instr = declVar;
+        while(instr != NULL){
+            // TODO check return type
+            checkInstr(instr, t);
+            instr = instr->nextSibling;
+        }
+    }
 
+    // print current scope
     if (f_table) {
         printCurrentScope(t);
     }
+    // TODO add following code when finish sementic check on instruction
     popScope(t);
 }
 
@@ -224,33 +235,35 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
 
-    
-
-    switch (node->kind){ /* Set variable in symbolTable */ 
-	case Program:
-		pushScope(t);
-		break;
-	case GlobeVar:
-		handleGlobeVar(node,t);
-		break;
-	case DefFunctHead:
-		handleEnTeteFunct(node, t);
-		break;
-	case DefFunctCorps:
-		handleDefFunctCorps(node, t);
-		break;
-	case DefStruct:
-		handleStructDef(node, t);
-		break;
-	case FuncSection:
-		write_main_section();
-		break;
-	case GlobVarsSection:
-		write_bss_section();
-		break;
-	default:
-		break;
-	}
+    switch (node->kind) {
+        case Program:
+            // push the scope for global variable and function
+            pushScope(t, "Global");
+            break;
+        case GlobeVar:
+            handleGlobeVar(node, t);
+            break;
+        case DefFunctHead:
+            handleEnTeteFunct(node, t);
+            break;
+        case DefFunctCorps:
+            handleDefFunctCorps(node, t);
+            break;
+        case DefStruct:
+            handleStructDef(node, t);
+            break;
+        case FuncSection:
+            write_main_section();
+            break;
+        case GlobVarsSection:
+            write_bss_section();
+            break;
+        default:
+            if (isExpNode(node)) {
+                typeOfExp(node, t);
+                break;
+            }
+    }
 
     for (Node *child = node->firstChild; child != NULL;
         child = child->nextSibling) {
