@@ -1,0 +1,14 @@
+struct hello{
+	int x;
+	int y;
+};
+
+int main (void){
+	int x;
+	struct hello y1;
+	// h used before declared
+	if (x && (y1.h) || p)
+		return 1;
+	else 
+		return 0;
+}

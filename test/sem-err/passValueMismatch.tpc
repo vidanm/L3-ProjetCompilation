@@ -1,0 +1,11 @@
+struct xxx{
+	int x;
+	int y;
+};
+
+int main(void){
+	int x;
+    struct xxx y;
+	x = y;
+	return 0;
+}

@@ -1,0 +1,18 @@
+struct hello{
+	int x;
+	int y;
+};
+
+struct yes{
+	struct hello h;
+	int y;
+	int x;
+};
+
+int main (void){
+	int x;
+	if (x && (y1.h) || p)
+		return 1;
+	else 
+		return 0;
+}
