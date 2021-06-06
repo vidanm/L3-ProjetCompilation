@@ -77,18 +77,34 @@ void write_bss_section(){
 
 void asmif(){;}
 
-void asmor(){;}
+void asmor(){
+	fprintf(file,"pop rax\n");
+	fprintf(file,"pop rbx\n");
+	fprintf(file,"or rax, rbx\n");
+}
 
-void asmand(){;}
+void asmand(){
+	fprintf(file,"pop rax\n");
+	fprintf(file,"pop rbx\n");
+	fprintf(file,"and rax, rbx\n");
+}
 
-void asmeq(){;}
+/*
+void asmeq(){
+	fprintf(file,"pop rax\n");
+	fprintf(file,"pop rbx\n");
+	fprintf(file,"cmp rax, rbx\n");
+} */
 
 void iprint(SymbolTable* table,char * ident){
+	/* Ne fonctionne pas 
+	 *
 	int address = getSymbolAddress(table,ident);
 	fprintf(file,";iprint()\n");
 	fprintf(file,"push [rsp+%d]\n",address);
 	fprintf(file,"call printf\n");
 	fprintf(file,"add esp, 8\n\n");
+	*/
 }
 
 
