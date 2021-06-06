@@ -116,6 +116,9 @@ int typeOfVariable(Node *identifier, SymbolTable *t) {
     // case of simple type variable
     if (FIRSTCHILD(identifier) == NULL) {
         res = lookupSymbol(t, identifier->u.identifier);
+        if(res == -1){
+            res = -2;
+        }
     } else {
         res = lookupStructSymbol(t, identifier->u.identifier,
                                  FIRSTCHILD(identifier)->u.identifier);
@@ -139,14 +142,16 @@ int typeOfExp(Node *exp, SymbolTable *t) {
         case Identifier: {
             return typeOfVariable(exp, t);
         }
+        case Call:{
+            printf("Sementic analyse not implemented on function calling\n");
+            exit(OTHERF_EXIT);
+        }
         default: {
             if (containsKind(boolNodes, boolNodeSize, exp->kind)) {
-                printf("line no: %d\n", exp->lineno);
                 return typeOfLogic(exp, t);
 
             } else if (containsKind(arithmeticNodes, arithmeticNodeSize,
                                     exp->kind)) {
-                printf("line no: %d\n", exp->lineno);
                 return typeOfArithmetic(exp, t);
             } else
                 return 0;

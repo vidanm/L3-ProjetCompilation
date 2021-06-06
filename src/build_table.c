@@ -259,10 +259,7 @@ void handleNodeAndScope(Node *node, SymbolTable *t) {
             write_bss_section();
             break;
         default:
-            if (isExpNode(node)) {
-                typeOfExp(node, t);
-                break;
-            }
+            break;
     }
 
     for (Node *child = node->firstChild; child != NULL;

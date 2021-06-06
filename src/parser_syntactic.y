@@ -397,7 +397,7 @@ int main(int argc, char *argv[]){
 	}
 
 	actual_stack_size = 0;
-	file =  fopen("bss.asm","w+");
+	file =  fopen("_anonymous.asm","w+");
 
     if(f_tree){
 	printTree(AST);
