@@ -10,6 +10,9 @@ test_results
 
 # middle files
 obj/*
+src/parser_syntactic.c
+src/parser_syntactic.h
+src/parser_lexical.c 
 
 # IDE file
 .vscode/*

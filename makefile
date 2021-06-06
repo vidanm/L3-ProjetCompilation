@@ -45,7 +45,7 @@ obj/%.o: src/%.c
 
 clean :
 	rm -f obj/*
-	rm -f $(EXEC)
+	rm -f $(EXEC) src/$(SYNTACTIC).c src/$(SYNTACTIC).h src/$(LEXICAL).c
 
 test: $(EXEC)
 	bash $(TEST_SCRIPT)
