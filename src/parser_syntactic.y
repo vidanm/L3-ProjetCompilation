@@ -3,10 +3,14 @@
 /* Syntaxe du TPC pour le projet d'analyse syntaxique de 2020-2021*/
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+
 #include "abstract-tree.h"
 #include "symbol-table.h"
 #include "build_table.h"
 #include "asm_generation.h"
+#include "parse_arg.h"
+
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -360,7 +364,7 @@ ListExp:
 int yyerror(const char *s) {
 	int j;
 	printf("%s ", s);
-	printf("%d - char %d:\n", lineno, charno);
+	printf("line %d, char %d:\n", lineno, charno);
 	printf("%s\n",line);
 	for (j=0;j<charno;j++){
 		if (line[j] == '\t')
@@ -372,17 +376,33 @@ int yyerror(const char *s) {
 	return 1;
 }
 
-int main(void){
-	
+int main(int argc, char *argv[]){
+    // parse argument
+    int res = parse_arg(argc, argv);
+    if(res == -1){
+        exit(OTHERF_EXIT);
+    }
+    // if help is in arg, print msg and normally exit
+    if(f_help){
+        help_reaction();
+        exit(NORMAL_EXIT);
+    }
+    // perform syntaxe analyse
+    if (yyparse() == 1){
+        // in case of error, exit with SYNERR_EXIT
+	    return SYNERR_EXIT;
+	}
+
 	actual_stack_size = 0;
 	file =  fopen("bss.asm","w+");
-	if (yyparse() == 1){
-	return 1;
-	}
-	printTree(AST);
-	SymbolTable *table = makeTableFromAST(AST);
 
-	printSymbolTable(table);
+    if(f_tree){
+	printTree(AST);
+    }
+	SymbolTable *table = makeTableFromAST(AST);
+    if(f_table){
+        printSymbolTable(table);
+    }
 
 	return 0;
 }	

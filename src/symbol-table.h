@@ -53,6 +53,7 @@ typedef struct scope {
 	Symbol *symbols[MAX_SYMBOL_NUM];
 	int size; 		// current size, AKA next index to insert
 	struct scope *father;
+	char name[256];
 } Scope;
 
 /* Definition of symbol table */
@@ -115,17 +116,14 @@ int lookupSymbol(SymbolTable *table, char identifier[]);
 /**
  * Add a scope in the symbol table
  */
-void pushScope(SymbolTable *table);
+void pushScope(SymbolTable *table, char *name);
 
 /** 
  * Remove current scope from the symbol table 
  */
 void popScope(SymbolTable *table);
 
-/**
- * Print symbol table to standard out
- */
-void printSymbolTable(SymbolTable *table);
+int equalSymbolType(SymbolType *st1, SymbolType *st2);
 
 int getSymbolAddress(SymbolTable *table, char identifier[]);
 
