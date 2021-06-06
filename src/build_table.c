@@ -94,7 +94,6 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 
     // insert function as a symbol
     insertSymbol(table, defFunctHead->u.identifier, td);
-    ldc(0); /* push 0 to stack */
     // add a scope to table
     pushScope(table);
     Node *param = SECONDCHILD(defFunctHead);
@@ -127,7 +126,6 @@ void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
              sibling = sibling->nextSibling) {
             insertSymbol(t, sibling->u.identifier, td);
-    	    ldc(0); /* push 0 to stack */
         }
         declVar = declVar->nextSibling;
     }
@@ -156,7 +154,10 @@ void handleStructDef(Node *structDef, SymbolTable *table) {
 }
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
-    switch (node->kind){
+
+    
+
+    switch (node->kind){ /* Set variable in symbolTable */ 
 	case Program:
 		pushScope(t);
 		break;
@@ -181,11 +182,33 @@ void handleNodeAndScope(Node *node, SymbolTable *t) {
 	default:
 		break;
 	}
-	for (Node *child = node->firstChild; child != NULL;
-         	     child = child->nextSibling) {
-        		handleNodeAndScope(child, t);
-    		}
 
+    for (Node *child = node->firstChild; child != NULL;
+        child = child->nextSibling) {
+	handleNodeAndScope(child, t);
+    }
+
+    switch (node->kind){
+	case DeclVar:
+		ldc(0);
+		break;
+	case Move:
+		/* evaluate Expr and store on the stack */
+		iload(t,node->firstChild->u.identifier); /* pop the stack and store the value */
+		break;
+	case UnaryAddSub:
+		iadd();
+		break;
+	case DivStar:
+		imul();
+		break;
+	case IntLiteral:
+		ldc(node->u.integer);
+		break;
+	default:
+		break;
+
+    }
     // deep first search
     
 }
