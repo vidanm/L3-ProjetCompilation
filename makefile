@@ -1,37 +1,47 @@
 CC=gcc
-CFLAGS=-Wall -g
-LDFLAGS=-Wall -lfl -ly -I src/
+CFLAGS=-Wall -g -I src/
+LDFLAGS=-Wall -lfl -ly 
 EXEC=bin/tpcc
 
 LEXICAL = parser_lexical
 SYNTACTIC = parser_syntactic
 
-OBJS = obj/$(LEXICAL).c obj/$(SYNTACTIC).c $(shell ls src/*.c)
+# all .c files without path
+SRC = $(SYNTACTIC).c $(LEXICAL).c $(shell (cd src && ls *c))
+# all .o files
+objects = $(addsuffix .o, $(addprefix obj/, $(basename $(SRC))))
 
 TEST_SCRIPT = tests.sh
-
+#############################################
+# create directory obj and bin if not exist
 OBJ = $(firstword $(wildcard obj))
 BIN = $(firstword $(wildcard bin))
-
 ifeq (,$(OBJ))
   $(shell mkdir obj)
 endif
-
 ifeq (,$(BIN))
   $(shell mkdir bin)
 endif
-
+#############################################3
 
 all : $(EXEC)
 
-$(EXEC): $(OBJS)
+$(EXEC): $(objects)
 	$(CC) $^ -o $(EXEC) $(CFLAGS) $(LDFLAGS)
 
-obj/$(SYNTACTIC).c : src/$(SYNTACTIC).y
+src/$(SYNTACTIC).c : src/$(SYNTACTIC).y
 	bison -d $< -o $@ -ly
 
-obj/$(LEXICAL).c: src/$(LEXICAL).flex
+src/$(LEXICAL).c: src/$(LEXICAL).flex
 	flex -o $@ $<
+
+# regular source c file at src with header
+obj/%.o: src/%.c src/%.h
+	$(CC) $< -o $@ $(CFLAGS) -c
+
+# regular source c file at src without header
+obj/%.o: src/%.c
+	$(CC) $< -o $@ $(CFLAGS) -c
 
 clean :
 	rm -f obj/*

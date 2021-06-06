@@ -1,8 +1,14 @@
+struct b{
+	int x;
+	char c;
+};
+
 struct airplane {
-	struct airplane x;
+	struct airplane a;
+	struct b x;
 	int weight;
 };
 
 int main(void){
-
+	struct airplane air;
 }

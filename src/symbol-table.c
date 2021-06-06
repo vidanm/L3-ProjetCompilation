@@ -25,13 +25,15 @@ Symbol *makeSymbol(char *identifier, int type_descriptor) {
     Symbol *s = (Symbol *)malloc(sizeof(Symbol));
     strcpy(s->identifier, identifier);
     s->type_descriptor = type_descriptor;
+    s->stack_address = actual_stack_size;
     return s;
 }
 
-Scope *makeScope(Scope *father) {
+Scope *makeScope(Scope *father, char *name) {
     Scope *s = (Scope *)malloc(sizeof(Scope));
     s->size = 0;
     s->father = father;
+    strcpy(s->name, name);
     return s;
 }
 
@@ -57,8 +59,8 @@ SymbolTable *makeEmptySymbolTable() {
 /* not implemented, wait OS to do its job */
 void freeScope(Scope *s) { ; }
 
-void pushScope(SymbolTable *table) {
-    Scope *cur = makeScope(table->current);
+void pushScope(SymbolTable *table, char *name) {
+    Scope *cur = makeScope(table->current, name);
     table->current = cur;
 }
 
@@ -73,6 +75,9 @@ void insertSymbol(SymbolTable *table, char identifier[], int type_descriptor) {
     current_scope->symbols[current_scope->size] =
         makeSymbol(identifier, type_descriptor);
     current_scope->size += 1;
+
+    actual_stack_size += 8; /* update stack index,
+			       all elements are qwords for testing */ 
 }
 
 int hasType(SymbolTable *table, SymbolType *type){
@@ -90,7 +95,6 @@ int hasType(SymbolTable *table, SymbolType *type){
  * Insert a definition of type to symbol table.
  */
 int insertType(SymbolTable *table, SymbolType *type) {
-    printf("Trying to insert type %d %s \n", type->type, type->name);
     if(hasType(table, type) != -1)
         return -1;
     table->typeDefined[table->type_size] = type;
@@ -104,6 +108,19 @@ int lookupSymbol(SymbolTable *table, char identifier[]) {
         for (size_t i = 0; i < cur->size; i++) {
             if (STR_EQUAL(cur->symbols[i]->identifier, identifier)) {
                 return cur->symbols[i]->type_descriptor;
+            }
+        }
+        cur = cur->father;
+    }
+    return -1;
+}
+
+int getSymbolAddress(SymbolTable *table, char identifier[]){
+    Scope *cur = table->current;
+    while (cur != NULL) {
+        for (size_t i = 0; i < cur->size; i++) {
+            if (STR_EQUAL(cur->symbols[i]->identifier, identifier)) {
+                return actual_stack_size - cur->symbols[i]->stack_address;
             }
         }
         cur = cur->father;

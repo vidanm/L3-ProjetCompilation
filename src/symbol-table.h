@@ -20,6 +20,7 @@
 #include <string.h>
 
 struct symbol;
+extern int actual_stack_size;
 
 typedef struct symbol_type {
 	/* type of type -> void 0, int 1, char 2, struct 3, function 4*/
@@ -43,6 +44,7 @@ typedef struct symbol_type {
 typedef struct symbol {
 	char identifier[MAX_NAME_LENGTH];
 	int type_descriptor;
+	int stack_address;
 } Symbol;
 
 
@@ -51,6 +53,7 @@ typedef struct scope {
 	Symbol *symbols[MAX_SYMBOL_NUM];
 	int size; 		// current size, AKA next index to insert
 	struct scope *father;
+	char name[256];
 } Scope;
 
 /* Definition of symbol table */
@@ -113,18 +116,16 @@ int lookupSymbol(SymbolTable *table, char identifier[]);
 /**
  * Add a scope in the symbol table
  */
-void pushScope(SymbolTable *table);
+void pushScope(SymbolTable *table, char *name);
 
 /** 
  * Remove current scope from the symbol table 
  */
 void popScope(SymbolTable *table);
 
-/**
- * Print symbol table to standard out
- */
-void printSymbolTable(SymbolTable *table);
+int equalSymbolType(SymbolType *st1, SymbolType *st2);
 
+int getSymbolAddress(SymbolTable *table, char identifier[]);
 
 #define STR_EQUAL(s1, s2) (strcmp(s1,s2) == 0)
 

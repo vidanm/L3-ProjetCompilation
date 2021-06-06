@@ -1,9 +1,25 @@
 #include "build_table.h"
-#include "asm_generation.h"
-extern FILE* file;
+
+extern FILE *file;
 
 /**
- *  Return the descriptor of the type in the node, or -1 in case of not existe.
+ * Check validation of AST type node.
+ * @p
+ * This function is potential exit, when meeting a undefined struct, this
+ * function exit program with SMEERR_EXIT.
+ * @p
+ * If its a void or simple type(int, char), return its type descriptor;
+ * @p
+ * If its a struct, check whether it has been defined, if not print error
+ * information to stderr and exit with semantical error code, otherwise return
+ * its type descriptor.
+ * @p
+ * In case that the node type's kind is unknown,
+ * exit program with OTHERF_EXIT, this is a runtime error,
+ * node Type shouldn't be other kind than Void, TypeSimp or TypeStruct.
+ *
+ * @return the correspodant type descriptor
+ *
  */
 int handleType(Node *type, SymbolTable *table) {
     switch (type->kind) {
@@ -15,18 +31,20 @@ int handleType(Node *type, SymbolTable *table) {
             return type->u.integer;
         }
         case TypeStruct: {
-            SymbolType *structType = makeSymbolType(TYPE_STRUCT, type->u.identifier, NULL, 0);
+            SymbolType *structType =
+                makeSymbolType(TYPE_STRUCT, type->u.identifier, NULL, 0);
             int td = hasType(table, structType);
             if (td == -1) {
                 fprintf(stderr, "struct not defined: %s\n", type->u.identifier);
-                exit(SMEERR_EXIT);
+                exit(SEMERR_EXIT);
             }
             return td;
         }
         default: {
-            fprintf(stderr, "unknown type type: %d\n", type->kind);
-            return type->kind;
-            //exit(-1);
+            fprintf(stderr,
+                    "Runtime error, type node is neither void, int, char, nor "
+                    "a struct\n");
+            exit(OTHERF_EXIT);
         }
     }
 }
@@ -36,8 +54,8 @@ void handleGlobeVar(Node *globeVar, SymbolTable *table) {
     Node *identifiers = globeVar->firstChild->nextSibling;
     for (Node *sibling = identifiers; sibling != NULL;
          sibling = sibling->nextSibling) {
-            reserveGlobalVarAdress(file,sibling->u.identifier,td);
-	    insertSymbol(table, sibling->u.identifier, td);
+        reserveGlobalVarAdress(file, sibling->u.identifier, td);
+        insertSymbol(table, sibling->u.identifier, td);
     }
 }
 
@@ -75,6 +93,7 @@ int handleParametres(Node *params, Symbol *params_symbols[],
  *
  */
 void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
+    // !! Global scope part
     Symbol **func_symbols =
         (Symbol **)malloc(sizeof(Symbol *) * MAX_MEMBER_NUMBER);
     // parser function return type
@@ -93,8 +112,10 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 
     // insert function as a symbol
     insertSymbol(table, defFunctHead->u.identifier, td);
-    // add a scope to table
-    pushScope(table);
+    ldc(0); /* push 0 to stack */
+
+    // !! local scope part, add a scope to table
+    pushScope(table, defFunctHead->u.identifier);
     Node *param = SECONDCHILD(defFunctHead);
     if (param->kind == Void) {
         return;
@@ -107,9 +128,15 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 }
 
 /**
- * Handle the node "DefFunctCorps" of AST, it insert all local symbols
+ * @p
+ * Handle the node "DefFunctCorps" of AST, it inserts all local symbols
  * to the symbol table, and // TODO does type checking on following
  * instructions.
+ * @p
+ * defCorps is a linked list of node, each node contains 2 children,
+ * the first is node Type, the seconde is a linked list of node Identifier.
+ *
+ * This function performs a sementic check, the variable type can not be void.
  *
  * @param defCorps, the pointer to AST "DefFunctCorps" Node.
  * @param t, the pointer to the symbol table.
@@ -117,58 +144,119 @@ void handleEnTeteFunct(Node *defFunctHead, SymbolTable *table) {
 void handleDefFunctCorps(Node *defCorps, SymbolTable *t) {
     Node *declVar = defCorps->firstChild;
     while (declVar != NULL && declVar->kind == DeclVar) {
-        printTree(declVar);
-        printTree(declVar->firstChild);
         int td = handleType(declVar->firstChild, t);
-        printf("function corp:%d\n", td);
-        // TODO after insert type check td, in case of -1, error undefine type.
+        // by definition of grammar, void is not a type,
+        // no need to check
         for (Node *sibling = SECONDCHILD(declVar); sibling != NULL;
              sibling = sibling->nextSibling) {
             insertSymbol(t, sibling->u.identifier, td);
         }
         declVar = declVar->nextSibling;
     }
+    // TODO perform semantic analyse in expressions
+
+    if (f_table) {
+        printCurrentScope(t);
+    }
+    popScope(t);
 }
 
+/**
+ * Converst a list of struct member into list of symbols,
+ * type checking will be performed during the transformation.
+ *
+ * @return  in case of invalid type in the member, return -1,
+ * otherwise, the number of members will be returned.
+ */
+int handleStructMembers(Node *members, Symbol *member_symbols[],
+                        SymbolTable *table) {
+    Node *begin = members;
+    int i = 0;
+    while (begin != NULL && begin->kind == DeclChamp) {
+        int td = handleType(begin->firstChild, table);
+        if (td == -1) {
+            return -1;
+        }
+        Node *identifier = begin->firstChild->nextSibling;
+        while (identifier != NULL && identifier->kind == Identifier) {
+            Symbol *s = makeSymbol(identifier->u.identifier, td);
+            member_symbols[i] = s;
+            i++;
+            identifier = identifier->nextSibling;
+        }
+        begin = begin->nextSibling;
+    }
+    return i;
+}
+
+/**
+ * Handle struct definition.
+ * This function is a potentiel exit, when meeting a duplication
+ * of structure definition, it will exit with SEMERR_EXIT.
+ *
+ */
 void handleStructDef(Node *structDef, SymbolTable *table) {
-    printf("We have a struct def\n");
     Symbol **struct_symbols =
         (Symbol **)malloc(sizeof(Symbol *) * MAX_MEMBER_NUMBER);
 
-    // parser struct member as array of symbols
-    int size = handleParametres(FIRSTCHILD(structDef), struct_symbols, table);
-    printf("member size: %d\n", size);
-
+    int size = 0;
     // combine them as function type
     SymbolType *structType = makeSymbolType(
         TYPE_STRUCT, structDef->u.identifier, struct_symbols, size);
-    // insert this type to symbol table
+
+    /**
+     * Insert this struct as a type to symbol table.
+     * Insert the type before parsing its member
+     * to enable self containing member.
+     */
     int td = insertType(table, structType);
-    printf("inserted at %d\n", td);
     if (td == -1) {
         fprintf(stderr, "Duplicated definition of structure %s\n",
                 structDef->u.identifier);
-        exit(SMEERR_EXIT);
+        exit(SEMERR_EXIT);
+    }
+    // parser struct member as array of symbols
+    size = handleStructMembers(FIRSTCHILD(structDef), struct_symbols, table);
+    // record member information
+    table->typeDefined[td]->memberSize = size;
+    for (int i = 0; i < size; i++) {
+        table->typeDefined[td]->member[i] = struct_symbols[i];
     }
 }
 
 void handleNodeAndScope(Node *node, SymbolTable *t) {
-    if (node->kind == Program) {
-        pushScope(t);
-    } else if (node->kind == GlobeVar) {
-        handleGlobeVar(node, t);
-    } else if (node->kind == DefFunctHead) {
-        handleEnTeteFunct(node, t);
-    } else if (node->kind == DefFunctCorps) {
-        handleDefFunctCorps(node, t);
-    } else if (node->kind == DefStruct) {
-        handleStructDef(node, t);
+    switch (node->kind) {
+        case Program:
+            // push the scope for global variable and function
+            pushScope(t, "Global");
+            break;
+        case GlobeVar:
+            handleGlobeVar(node, t);
+            break;
+        case DefFunctHead:
+            handleEnTeteFunct(node, t);
+            break;
+        case DefFunctCorps:
+            handleDefFunctCorps(node, t);
+            break;
+        case DefStruct:
+            handleStructDef(node, t);
+            break;
+        case FuncSection:
+            write_main_section();
+            break;
+        case GlobVarsSection:
+            write_bss_section();
+            break;
+        default:
+            break;
     }
-    // deep first search
     for (Node *child = node->firstChild; child != NULL;
          child = child->nextSibling) {
         handleNodeAndScope(child, t);
     }
+
+    // deep first search
 }
 
 /**
